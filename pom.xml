@@ -10,7 +10,7 @@
 	<groupId>org.javacc</groupId>
 	<artifactId>core</artifactId>
 	<packaging>jar</packaging>
-	<version>8.0.0-SNAPSHOT</version>
+	<version>8.0.0</version>
 
 	<name>JavaCC 8 Core</name>
 
@@ -18,7 +18,7 @@
 		<url>https://github.com/javacc/javacc-8-core</url>
 		<connection>scm:git:https://github.com/javacc/javacc-8-core.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/javacc/javacc-8-core.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>core-8.0.0</tag>
 	</scm>
 	<properties>
 		<root>${basedir}/..</root>
