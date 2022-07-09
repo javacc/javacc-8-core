@@ -412,7 +412,7 @@ class NfaState {
         }
       }
 
-  return null;
+      return null;
   }
 
   // generates code (without outputting it) and returns the name used.
@@ -929,21 +929,32 @@ class NfaState {
 
       // Some of the NFA states that are epsilon move are mapped to others in the same lexical states so adjust those as well here.
       // See the GenerateCode method where we set the name one state to be that of an equivalent state.
+      Set<NfaState> useless = new HashSet<NfaState>();
       for (int i = 0; i < states.size(); i++) {
         NfaState s = states.get(i);
         if (s.next != null) {
           assert (s.lexState == s.next.lexState);
           for (NfaState next : s.next.epsilonMoveArray) {
             if (next.stateName != -1 && !states.contains(next)) {
-              next.stateName += offset;
-              if (!(next.stateName >= minStateName && next.stateName <= maxStateName)) {
-                throw new Error("Bug: epsilon move nfa state: " + next.stateName + " not mapped to a valid state in rangE: " + minStateName + "-" + maxStateName);
+               next.stateName += offset;
+               if (!(next.stateName >= minStateName && next.stateName <= maxStateName)) {
+                 useless.add(next);
+                 assert !next.isFinal;
+                 assert next.next == null || next.next.stateName == -1;
               }
             }
           }
         }
       }
 
+      // Make sure all useless states only go to other useless states
+      for (NfaState u: useless) {
+        assert u.charMoves == null;
+        assert u.next == null || useless.contains(u.next) || !states.contains(u.next) : "Next: " + u.next.stateName;
+        for (NfaState un: u.epsilonMoveArray) {
+           assert un.stateName != -1 || useless.contains(un);
+        }
+      }
       cleanStateList.addAll(states);
     }
 

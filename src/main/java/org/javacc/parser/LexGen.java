@@ -54,7 +54,6 @@ public class LexGen {
   private String[]                                 newLexState;
   private Action[]                                 actions;
   private Hashtable<String, NfaState>              initStates     = new Hashtable<>();
-  private int                                      stateSetSize;
   private int                                      totalNumStates;
   private int                                      maxLexStates;
 
@@ -88,7 +87,6 @@ public class LexGen {
     newLexState = null;
     rexprs = null;
     singlesToSkip = null;
-    stateSetSize = 0;
     toMore = null;
     toSkip = null;
     toSpecial = null;
@@ -331,10 +329,8 @@ public class LexGen {
       RStringLiteral.UpdateStringLiteralData(totalNumStates, lexerContext);
       NfaState.UpdateNfaData(totalNumStates, startState, lexerContext.lexStateIndex,
           lexerContext.canMatchAnyChar[lexerContext.lexStateIndex], lexerContext);
+      assert (lexerContext.generatedStates == lexerContext.statesForLexicalState.get(k).size());
       totalNumStates += lexerContext.generatedStates;
-      if (stateSetSize < lexerContext.generatedStates) {
-        stateSetSize = lexerContext.generatedStates;
-      }
     }
 
     for (i = 0; i < choices.size(); i++) {
