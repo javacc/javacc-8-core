@@ -109,7 +109,7 @@ TOKEN_MGR_DECLS:
 
 /**
  * You can get an operator at any time (in any lexical state), except when
- * a digit is required (afdter a .). Then just go to a state where the next
+ * a digit is required (after a .). Then just go to a state where the next
  * operand is scanned (for that particular operator).
  */
 <OP_OR_OPERAND, OPERAND, OPTIONAL_DIGIT, OP_LOOP> SKIP:

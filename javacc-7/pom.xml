@@ -208,12 +208,12 @@ THE POSSIBILITY OF SUCH DAMAGE.
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.22.2</version>
         </plugin>
-        <plugin>
+<!--        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>cobertura-maven-plugin</artifactId>
           <version>2.7</version>
         </plugin>
-        <plugin>
+-->        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>3.1.0</version>
@@ -286,7 +286,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <forkMode>once</forkMode>
           <includes>
             <include>**/*Test.java</include>
           </includes>
@@ -647,7 +646,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
           </execution>
         </executions>
       </plugin>
-      <plugin>
+<!--      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
         <executions>
@@ -658,7 +657,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
           </execution>
         </executions>
       </plugin>
-      <plugin>
+-->      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
@@ -687,7 +686,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
           <minmemory>128m</minmemory>
           <maxmemory>512m</maxmemory>
           <level>protected</level>
-          <doclint>none</doclint>
+          <doclint>${javadoc.doclint}</doclint>
           <quiet>true</quiet>
         </configuration>
       </plugin>
@@ -778,11 +777,11 @@ THE POSSIBILITY OF SUCH DAMAGE.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
       </plugin>
-      <plugin>
+<!--      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
       </plugin>
-      <plugin>
+-->      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin>

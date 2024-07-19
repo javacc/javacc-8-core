@@ -47,17 +47,24 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 11
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '11'
         cache: 'maven'
 
-    - name: Build package on javacc-8-core
-      run: mvn -B -e package
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+         path: ~/.m2
+         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+         restore-keys: ${{ runner.os }}-m2
+       
+#    - name: Build package on javacc-8-core
+#      run: mvn -B -e package
 
-    - name: Run install on javacc-8-java
+    - name: Run install on javacc-8-core
       run: mvn -B -e install
