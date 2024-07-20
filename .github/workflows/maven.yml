@@ -76,7 +76,7 @@ jobs:
          restore-keys: ${{ runner.os }}-m2
 
 #    - name: Build package on javacc-8-core
-#      run: mvn -B -e package
+#      run: mvn -B -e package --file javacc-8-core/pom.xml
 
     - name: Run install on javacc-8-core
-      run: mvn -B -e install
+      run: mvn -B -e install --file javacc-8-core/pom.xml
