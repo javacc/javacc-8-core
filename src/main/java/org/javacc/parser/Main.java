@@ -181,16 +181,16 @@ public class Main {
       System.out.println("(type \"javacc\" with no arguments for help)");
     }
 
-    if (Options.isOption(args[args.length - 1])) {
+    if (Options.canArgBeAnOption(args[args.length - 1])) {
       System.out.println("Last argument \"" + args[args.length - 1] + "\" is not a filename.");
       return 1;
     }
     for (int arg = 0; arg < (args.length - 1); arg++) {
-      if (!Options.isOption(args[arg])) {
+      if (!Options.canArgBeAnOption(args[arg])) {
         System.out.println("Argument \"" + args[arg] + "\" must be an option setting.");
         return 1;
       }
-      Options.setCmdLineOption(args[arg]);
+      Options.processCmdLineOption(args[arg]);
     }
 
 
@@ -249,12 +249,12 @@ public class Main {
         LexGen lg = new LexGen(context);
         TokenizerData tokenizerData = lg.generateTokenizerData(false, unicodeWarning);
 
-        Options.setStringOption(Options.NONUSER_OPTION__PARSER_NAME, context.globals().cu_name);
+        Options.setStringOption(Options.NUO__PARSER_NAME, context.globals().cu_name);
 
         if (context.errors().get_error_count() != 0) {
           throw new MetaParseException();
         }
-        if (Options.isGenerateBoilerplateCode()) {
+        if (Options.getGenerateBoilerplateCode()) {
         	CodeGeneratorSettings cgs = CodeGeneratorSettings.of(Options.getOptions());
           if (!codeGenerator.getTokenCodeGenerator(context).generateCodeForToken(cgs) || 
               !codeGenerator.generateHelpers(context, cgs,  tokenizerData)

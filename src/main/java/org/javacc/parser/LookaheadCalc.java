@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,10 +24,9 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import java.util.List;
 
 class LookaheadCalc {
 
-  private static MatchInfo overlap(List<MatchInfo> v1, List<MatchInfo> v2) {
+  private static MatchInfo overlap(final List<MatchInfo> v1, final List<MatchInfo> v2) {
     MatchInfo m1, m2, m3;
     int size;
     boolean diff;
@@ -65,7 +67,7 @@ class LookaheadCalc {
     return null;
   }
 
-  private static boolean javaCodeCheck(List<MatchInfo> v) {
+  private static boolean javaCodeCheck(final List<MatchInfo> v) {
     for (int i = 0; i < v.size(); i++) {
       if (v.get(i).firstFreeLoc == 0) {
         return true;
@@ -74,13 +76,14 @@ class LookaheadCalc {
     return false;
   }
 
-  private static String image(MatchInfo m, Context context) {
+  private static String image(final MatchInfo m, final Context context) {
     String ret = "";
     for (int i = 0; i < m.firstFreeLoc; i++) {
       if (m.match[i] == 0) {
         ret += " <EOF>";
       } else {
-        RegularExpression re = context.globals().rexps_of_tokens.get(Integer.valueOf(m.match[i]));
+        final RegularExpression re =
+            context.globals().rexps_of_tokens.get(Integer.valueOf(m.match[i]));
         if (re instanceof RStringLiteral) {
           ret += " \"" + JavaCCGlobals.add_escapes(((RStringLiteral) re).image) + "\"";
         } else if ((re.label != null) && !re.label.equals("")) {
@@ -97,23 +100,23 @@ class LookaheadCalc {
     }
   }
 
-  static void choiceCalc(Choice ch, Context context) {
-    int first = LookaheadCalc.firstChoice(ch);
+  static void choiceCalc(final Choice ch, final Context context) {
+    final int first = LookaheadCalc.firstChoice(ch);
     // dbl[i] and dbr[i] are lists of size limited matches for choice i
     // of ch. dbl ignores matches with semantic lookaheads (when force_la_check
     // is false), while dbr ignores semantic lookahead.
-    List<MatchInfo>[] dbl = new ArrayList[ch.getChoices().size()];
-    List<MatchInfo>[] dbr = new ArrayList[ch.getChoices().size()];
-    int[] minLA = new int[ch.getChoices().size() - 1];
-    MatchInfo[] overlapInfo = new MatchInfo[ch.getChoices().size() - 1];
-    int[] other = new int[ch.getChoices().size() - 1];
+    final List<MatchInfo>[] dbl = new ArrayList[ch.getChoices().size()];
+    final List<MatchInfo>[] dbr = new ArrayList[ch.getChoices().size()];
+    final int[] minLA = new int[ch.getChoices().size() - 1];
+    final MatchInfo[] overlapInfo = new MatchInfo[ch.getChoices().size() - 1];
+    final int[] other = new int[ch.getChoices().size() - 1];
     MatchInfo m;
     List<MatchInfo> v;
     boolean overlapDetected;
     for (int la = 1; la <= Options.getChoiceAmbiguityCheck(); la++) {
-      boolean forceLaCheck = !Options.getForceLaCheck();
+      final boolean forceLaCheck = !Options.getForceLaCheck();
       for (int i = first; i < (ch.getChoices().size() - 1); i++) {
-        LookaheadWalk lookahead = new LookaheadWalk(forceLaCheck);
+        final LookaheadWalk lookahead = new LookaheadWalk(forceLaCheck);
         m = new MatchInfo(la);
         m.firstFreeLoc = 0;
         v = new ArrayList<>();
@@ -122,7 +125,7 @@ class LookaheadCalc {
         dbl[i] = lookahead.getSizeLimitedMatches();
       }
       for (int i = first + 1; i < ch.getChoices().size(); i++) {
-        LookaheadWalk lookahead = new LookaheadWalk(false);
+        final LookaheadWalk lookahead = new LookaheadWalk(false);
         m = new MatchInfo(la);
         m.firstFreeLoc = 0;
         v = new ArrayList<>();
@@ -132,14 +135,22 @@ class LookaheadCalc {
       }
       if (la == 1) {
         for (int i = first; i < (ch.getChoices().size() - 1); i++) {
-          Expansion exp = ch.getChoices().get(i);
+          final Expansion exp = ch.getChoices().get(i);
           if (Semanticize.emptyExpansionExists(exp)) {
-            context.errors().warning(exp, "This choice can expand to the empty token sequence "
-                + "and will therefore always be taken in favor of the choices appearing later.");
+            context
+                .errors()
+                .warning(
+                    exp,
+                    "This choice can expand to the empty token sequence "
+                        + "and will therefore always be taken in favor of the choices appearing later.");
             break;
           } else if (LookaheadCalc.javaCodeCheck(dbl[i])) {
-            context.errors().warning(exp, "JAVACODE non-terminal will force this choice to be taken "
-                + "in favor of the choices appearing later.");
+            context
+                .errors()
+                .warning(
+                    exp,
+                    "JAVACODE non-terminal will force this choice to be taken "
+                        + "in favor of the choices appearing later.");
             break;
           }
         }
@@ -171,8 +182,12 @@ class LookaheadCalc {
         System.err.print(" and line " + ch.getChoices().get(other[i]).getLine());
         System.err.print(", column " + ch.getChoices().get(other[i]).getColumn());
         System.err.println(" respectively.");
-        System.err.println("         A common prefix is: " + LookaheadCalc.image(overlapInfo[i], context));
-        System.err.println("         Consider using a lookahead of " + minLA[i] + " or more for earlier expansion.");
+        System.err.println(
+            "         A common prefix is: " + LookaheadCalc.image(overlapInfo[i], context));
+        System.err.println(
+            "         Consider using a lookahead of "
+                + minLA[i]
+                + " or more for earlier expansion.");
       } else if (minLA[i] > 1) {
         context.errors().warning("Choice conflict involving two expansions at");
         System.err.print("         line " + ch.getChoices().get(i).getLine());
@@ -180,26 +195,28 @@ class LookaheadCalc {
         System.err.print(" and line " + ch.getChoices().get(other[i]).getLine());
         System.err.print(", column " + ch.getChoices().get(other[i]).getColumn());
         System.err.println(" respectively.");
-        System.err.println("         A common prefix is: " + LookaheadCalc.image(overlapInfo[i], context));
-        System.err.println("         Consider using a lookahead of " + minLA[i] + " for earlier expansion.");
+        System.err.println(
+            "         A common prefix is: " + LookaheadCalc.image(overlapInfo[i], context));
+        System.err.println(
+            "         Consider using a lookahead of " + minLA[i] + " for earlier expansion.");
       }
     }
   }
 
-  private static boolean explicitLA(Expansion exp) {
+  private static boolean explicitLA(final Expansion exp) {
     if (!(exp instanceof Sequence)) {
       return false;
     }
-    Sequence seq = (Sequence) exp;
-    Object obj = seq.units.get(0);
+    final Sequence seq = (Sequence) exp;
+    final Object obj = seq.units.get(0);
     if (!(obj instanceof Lookahead)) {
       return false;
     }
-    Lookahead la = (Lookahead) obj;
+    final Lookahead la = (Lookahead) obj;
     return la.isExplicit();
   }
 
-  private static int firstChoice(Choice ch) {
+  private static int firstChoice(final Choice ch) {
     if (Options.getForceLaCheck()) {
       return 0;
     }
@@ -211,7 +228,7 @@ class LookaheadCalc {
     return ch.getChoices().size();
   }
 
-  private static String image(Expansion exp) {
+  private static String image(final Expansion exp) {
     if (exp instanceof OneOrMore) {
       return "(...)+";
     } else if (exp instanceof ZeroOrMore) {
@@ -221,7 +238,7 @@ class LookaheadCalc {
     }
   }
 
-  static void ebnfCalc(Expansion exp, Expansion nested, Semanticize semanticize) {
+  static void ebnfCalc(final Expansion exp, final Expansion nested, final Semanticize semanticize) {
     // exp is one of OneOrMore, ZeroOrMore, ZeroOrOne
     MatchInfo m, m1 = null;
     List<MatchInfo> v;
@@ -241,10 +258,15 @@ class LookaheadCalc {
       follow = walk.getSizeLimitedMatches();
       if (la == 1) {
         if (LookaheadCalc.javaCodeCheck(first)) {
-          semanticize.getContext().errors().warning(nested,
-              "JAVACODE non-terminal within " + LookaheadCalc.image(exp)
-              + " construct will force this construct to be entered in favor of "
-              + "expansions occurring after construct.");
+          semanticize
+              .getContext()
+              .errors()
+              .warning(
+                  nested,
+                  "JAVACODE non-terminal within "
+                      + LookaheadCalc.image(exp)
+                      + " construct will force this construct to be entered in favor of "
+                      + "expansions occurring after construct.");
         }
       }
       if ((m = LookaheadCalc.overlap(first, follow)) == null) {
@@ -253,18 +275,44 @@ class LookaheadCalc {
       m1 = m;
     }
     if (la > Options.getOtherAmbiguityCheck()) {
-      semanticize.getContext().errors().warning("Choice conflict in " + LookaheadCalc.image(exp) + " construct "
-          + "at line " + exp.getLine() + ", column " + exp.getColumn() + ".");
-      System.err.println("         Expansion nested within construct and expansion following construct");
-      System.err.println("         have common prefixes, one of which is: " + LookaheadCalc.image(m1, semanticize.getContext()));
-      System.err.println("         Consider using a lookahead of " + la + " or more for nested expansion.");
+      semanticize
+          .getContext()
+          .errors()
+          .warning(
+              "Choice conflict in "
+                  + LookaheadCalc.image(exp)
+                  + " construct "
+                  + "at line "
+                  + exp.getLine()
+                  + ", column "
+                  + exp.getColumn()
+                  + ".");
+      System.err.println(
+          "         Expansion nested within construct and expansion following construct");
+      System.err.println(
+          "         have common prefixes, one of which is: "
+              + LookaheadCalc.image(m1, semanticize.getContext()));
+      System.err.println(
+          "         Consider using a lookahead of " + la + " or more for nested expansion.");
     } else if (la > 1) {
-      semanticize.getContext().errors().warning("Choice conflict in " + LookaheadCalc.image(exp) + " construct "
-          + "at line " + exp.getLine() + ", column " + exp.getColumn() + ".");
-      System.err.println("         Expansion nested within construct and expansion following construct");
-      System.err.println("         have common prefixes, one of which is: " + LookaheadCalc.image(m1, semanticize.getContext()));
+      semanticize
+          .getContext()
+          .errors()
+          .warning(
+              "Choice conflict in "
+                  + LookaheadCalc.image(exp)
+                  + " construct "
+                  + "at line "
+                  + exp.getLine()
+                  + ", column "
+                  + exp.getColumn()
+                  + ".");
+      System.err.println(
+          "         Expansion nested within construct and expansion following construct");
+      System.err.println(
+          "         have common prefixes, one of which is: "
+              + LookaheadCalc.image(m1, semanticize.getContext()));
       System.err.println("         Consider using a lookahead of " + la + " for nested expansion.");
     }
   }
-
 }

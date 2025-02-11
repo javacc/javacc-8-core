@@ -134,16 +134,16 @@ public class JJTree {
 
       String fn = args[args.length - 1];
 
-      if (Options.isOption(fn)) {
+      if (Options.canArgBeAnOption(fn)) {
         p("Last argument \"" + fn + "\" is not a filename");
         return 1;
       }
       for (int arg = 0; arg < (args.length - 1); arg++) {
-        if (!Options.isOption(args[arg])) {
+        if (!Options.canArgBeAnOption(args[arg])) {
           p("Argument \"" + args[arg] + "\" must be an option setting.");
           return 1;
         }
-        Options.setCmdLineOption(args[arg]);
+        Options.processCmdLineOption(args[arg]);
       }
 
       context.validate();
@@ -196,10 +196,10 @@ public class JJTree {
   private static void generateIO(IO io, ASTGrammar grammar, JJTreeContext context) throws IOException {
     // TODO :: CBA -- Require Unification of output language specific processing
     // into a single Enum class
-    CodeGenerator codeGenerator = context.getCodeGenerator();
-    if (codeGenerator != null) {
-      codeGenerator.getJJTreeCodeGenerator(context).visit(grammar, io);
-      codeGenerator.getJJTreeCodeGenerator(context).generateHelperFiles();
+    CodeGenerator cg = context.getCodeGenerator();
+    if (cg != null) {
+      cg.getJJTreeCodeGenerator(context).visit(grammar, io);
+      cg.getJJTreeCodeGenerator(context).generateHelperFiles();
     } else {
       // Catch all to ensure we don't accidently do nothing
       throw new RuntimeException("No valid CodeGenerator for JJTree : " + Options.getCodeGenerator());

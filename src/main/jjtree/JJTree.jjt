@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,7 +27,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 options {
   MULTI = true;
   NODE_DEFAULT_VOID = true;
@@ -424,19 +425,19 @@ void option_binding() #OptionBinding :
   (
      v=IntegerLiteral()
         {
-	  JJTreeOptions.setInputFileOption(o, v, o.image, new Integer(v.image), context);
+	  JJTreeOptions.processGrammarFileOption(o, v, o.image, new Integer(v.image), context);
 	  jjtThis.initialize(o.image, v.image);
 	}
    | v=BooleanLiteral()
         {
-	  JJTreeOptions.setInputFileOption(o, v, o.image,
+	  JJTreeOptions.processGrammarFileOption(o, v, o.image,
 				     Boolean.valueOf(v.image), context);
 	  jjtThis.initialize(o.image, v.image);
 	}
    | v=StringLiteral()
         {	
 	  String vs = TokenUtils.remove_escapes_and_quotes(v, v.image, context);
-	  JJTreeOptions.setInputFileOption(o, v, o.image, (Object)vs, context);
+	  JJTreeOptions.processGrammarFileOption(o, v, o.image, (Object)vs, context);
 	  jjtThis.initialize(o.image, vs);
 	}
   ) ";"

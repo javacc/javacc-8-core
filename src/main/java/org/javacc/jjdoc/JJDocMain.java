@@ -110,16 +110,16 @@ public final class JJDocMain extends JJDocGlobals {
     }
 
 
-    if (Options.isOption(args[args.length - 1])) {
+    if (Options.canArgBeAnOption(args[args.length - 1])) {
       JJDocGlobals.error(context, "Last argument \"" + args[args.length - 1] + "\" is not a filename or \"-\".  ");
       return 1;
     }
     for (int arg = 0; arg < (args.length - 1); arg++) {
-      if (!Options.isOption(args[arg])) {
+      if (!Options.canArgBeAnOption(args[arg])) {
         JJDocGlobals.error(context, "Argument \"" + args[arg] + "\" must be an option setting.  ");
         return 1;
       }
-      Options.setCmdLineOption(args[arg]);
+      Options.processCmdLineOption(args[arg]);
     }
 
     if (args[args.length - 1].equals("-")) {

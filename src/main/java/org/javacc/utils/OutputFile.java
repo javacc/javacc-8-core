@@ -112,7 +112,7 @@ class OutputFile implements Closeable {
         writer.println("/* " + JavaCCGlobals.getIdString(toolName, file.getName()) + " Version " + version + " */");
         if (!options.isEmpty()) {
           writer.println(
-              "/* JavaCCOptions:" + Options.getOptionsString(options.toArray(new String[options.size()])) + " */");
+              "/* JavaCCOptions:" + Options.fmtOptionsArray(options.toArray(new String[options.size()])) + " */");
         }
       } catch (NoSuchAlgorithmException e) {
         throw (IOException) new IOException("No MD5 implementation").initCause(e);

@@ -10,39 +10,39 @@ public class JJTreeContext extends Context {
   private final JJTreeOptions treeOptions = new JJTreeOptions();
 
   public JJTreeContext() {
-    Options.optionValues.put("MULTI", Boolean.FALSE);
-    Options.optionValues.put("NODE_DEFAULT_VOID", Boolean.FALSE);
-    Options.optionValues.put("NODE_SCOPE_HOOK", Boolean.FALSE);
-    Options.optionValues.put("NODE_USES_PARSER", Boolean.FALSE);
-    Options.optionValues.put("BUILD_NODE_FILES", Boolean.TRUE);
-    Options.optionValues.put("VISITOR", Boolean.FALSE);
-    Options.optionValues.put("VISITOR_METHOD_NAME_INCLUDES_TYPE_NAME", Boolean.FALSE);
-    Options.optionValues.put("TRACK_TOKENS", Boolean.FALSE);
+    Options.resOptions.put("MULTI", Boolean.FALSE);
+    Options.resOptions.put("NODE_DEFAULT_VOID", Boolean.FALSE);
+    Options.resOptions.put("NODE_SCOPE_HOOK", Boolean.FALSE);
+    Options.resOptions.put("NODE_USES_PARSER", Boolean.FALSE);
+    Options.resOptions.put("BUILD_NODE_FILES", Boolean.TRUE);
+    Options.resOptions.put("VISITOR", Boolean.FALSE);
+    Options.resOptions.put("VISITOR_METHOD_NAME_INCLUDES_TYPE_NAME", Boolean.FALSE);
+    Options.resOptions.put("TRACK_TOKENS", Boolean.FALSE);
 
-    Options.optionValues.put("NODE_PREFIX", "AST");
-    Options.optionValues.put("NODE_PACKAGE", "");
-    Options.optionValues.put("NODE_EXTENDS", "");
-    Options.optionValues.put("NODE_CLASS", "");
-    Options.optionValues.put("NODE_FACTORY", "");
-    Options.optionValues.put("NODE_INCLUDES", "");
-    Options.optionValues.put("OUTPUT_FILE", "");
-    Options.optionValues.put("VISITOR_DATA_TYPE", "");
-    Options.optionValues.put("VISITOR_RETURN_TYPE", "Object");
-    Options.optionValues.put("VISITOR_EXCEPTION", "");
+    Options.resOptions.put("NODE_PREFIX", "AST");
+    Options.resOptions.put("NODE_PACKAGE", "");
+    Options.resOptions.put("NODE_EXTENDS", "");
+    Options.resOptions.put("NODE_CLASS", "");
+    Options.resOptions.put("NODE_FACTORY", "");
+    Options.resOptions.put("NODE_INCLUDES", "");
+    Options.resOptions.put("OUTPUT_FILE", "");
+    Options.resOptions.put("VISITOR_DATA_TYPE", "");
+    Options.resOptions.put("VISITOR_RETURN_TYPE", "Object");
+    Options.resOptions.put("VISITOR_EXCEPTION", "");
 
-    Options.optionValues.put("NODE_DIRECTORY", "");
-    Options.optionValues.put("JJTREE_OUTPUT_DIRECTORY", "");
+    Options.resOptions.put("NODE_DIRECTORY", "");
+    Options.resOptions.put("JJTREE_OUTPUT_DIRECTORY", "");
 
 
     // TODO :: 2013/07/23 -- This appears to be a duplicate from the parent
     // class
-    Options.optionValues.put(Options.USEROPTION__JDK_VERSION, "1.5");
+    Options.resOptions.put(Options.UO__JDK_VERSION, "1.5");
 
     // Also appears to be a duplicate
-    Options.optionValues.put(Options.USEROPTION__CPP_NAMESPACE, "");
+    Options.resOptions.put(Options.UO__NAMESPACE, "");
 
     // Also appears to be a duplicate
-    Options.optionValues.put(Options.USEROPTION__IGNORE_ACTIONS, Boolean.FALSE);
+    Options.resOptions.put(Options.UO__IGNORE_ACTIONS, Boolean.FALSE);
   }
 
   public final JJTreeOptions treeOptions() {

@@ -760,7 +760,7 @@ class NfaState {
     if (toRet >= nameSet.length) {
       // TODO(sreeni) : Fix this mess.
       if ((lexerContext.context.getCodeGenerator() != null)
-          || Options.booleanValue(Options.NONUSER_OPTION__INTERPRETER)) {
+          || Options.booleanValue(Options.NUO__INTERPRETER)) {
         tmp = lexerContext.generatedStates++;
       } else {
         if (lexerContext.dummyStateIndex == -1) {
@@ -771,7 +771,7 @@ class NfaState {
       }
 
       if ((lexerContext.context.getCodeGenerator() != null)
-          || Options.booleanValue(Options.NONUSER_OPTION__INTERPRETER)) {
+          || Options.booleanValue(Options.NUO__INTERPRETER)) {
         NfaState dummyState = new NfaState(lexerContext);
         dummyState.isComposite = true;
         dummyState.compositeStates = nameSet;
@@ -789,7 +789,7 @@ class NfaState {
     lexerContext.stateNameForComposite.put(stateSetString, stateNameToReturn);
     lexerContext.compositeStateTable.put(stateSetString, nameSet);
     if ((lexerContext.context.getCodeGenerator() != null)
-        || Options.booleanValue(Options.NONUSER_OPTION__INTERPRETER)) {
+        || Options.booleanValue(Options.NUO__INTERPRETER)) {
       NfaState tmpNfaState = lexerContext.indexedAllStates.get(tmp);
       for (int c : nameSet) {
         if (c < lexerContext.indexedAllStates.size()) {

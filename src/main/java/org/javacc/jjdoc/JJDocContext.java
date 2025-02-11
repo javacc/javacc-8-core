@@ -10,13 +10,13 @@ public class JJDocContext extends Context {
   public JJDocContext() {
     super(new Options());
 
-    Options.optionValues.put("ONE_TABLE", Boolean.TRUE);
-    Options.optionValues.put("TEXT", Boolean.FALSE);
-    Options.optionValues.put("XTEXT", Boolean.FALSE);
-    Options.optionValues.put("BNF", Boolean.FALSE);
-    Options.optionValues.put("JCC", Boolean.FALSE);
-    Options.optionValues.put("OUTPUT_FILE", "");
-    Options.optionValues.put("CSS", "");
+    Options.resOptions.put("ONE_TABLE", Boolean.TRUE);
+    Options.resOptions.put("TEXT", Boolean.FALSE);
+    Options.resOptions.put("XTEXT", Boolean.FALSE);
+    Options.resOptions.put("BNF", Boolean.FALSE);
+    Options.resOptions.put("JCC", Boolean.FALSE);
+    Options.resOptions.put("OUTPUT_FILE", "");
+    Options.resOptions.put("CSS", "");
   }
 
   /**

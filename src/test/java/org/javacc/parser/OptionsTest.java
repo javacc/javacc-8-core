@@ -57,15 +57,15 @@ public final class OptionsTest extends TestCase {
     Context context = new Context();
 
     assertEquals(true, Options.getStatic());
-    Options.setCmdLineOption("-NOSTATIC");
+    Options.processCmdLineOption("-NOSTATIC");
     assertEquals(false, Options.getStatic());
 
     assertEquals(false, Options.getJavaUnicodeEscape());
-    Options.setCmdLineOption("-JAVA_UNICODE_ESCAPE:true");
+    Options.processCmdLineOption("-JAVA_UNICODE_ESCAPE:true");
     assertEquals(true, Options.getJavaUnicodeEscape());
 
     assertEquals(true, Options.getSanityCheck());
-    Options.setCmdLineOption("-SANITY_CHECK=false");
+    Options.processCmdLineOption("-SANITY_CHECK=false");
     assertEquals(false, Options.getSanityCheck());
 
     assertEquals(0, context.errors().get_warning_count());
@@ -80,13 +80,13 @@ public final class OptionsTest extends TestCase {
     Context context = new Context();
 
     assertEquals(1, Options.getLookahead());
-    Options.setCmdLineOption("LOOKAHEAD=2");
+    Options.processCmdLineOption("LOOKAHEAD=2");
     assertEquals(2, Options.getLookahead());
     assertEquals(0, context.errors().get_warning_count());
-    Options.setCmdLineOption("LOOKAHEAD=0");
+    Options.processCmdLineOption("LOOKAHEAD=0");
     assertEquals(2, Options.getLookahead());
     assertEquals(0, context.errors().get_warning_count());
-    Options.setInputFileOption(null, null, Options.USEROPTION__LOOKAHEAD, new Integer(0), context);
+    Options.processGrammarFileOption(null, null, Options.UO__LOOKAHEAD, new Integer(0), context);
     assertEquals(2, Options.getLookahead());
     assertEquals(1, context.errors().get_warning_count());
 
@@ -100,17 +100,17 @@ public final class OptionsTest extends TestCase {
     Context context = new Context();
 
     assertEquals("", Options.getTokenExtends());
-    Options.setCmdLineOption("-TOKEN_EXTENDS=java.lang.Object");
+    Options.processCmdLineOption("-TOKEN_EXTENDS=java.lang.Object");
     assertEquals("java.lang.Object", Options.getTokenExtends());
-    Options.setInputFileOption(null, null, Options.USEROPTION__TOKEN_EXTENDS, "Object", context);
+    Options.processGrammarFileOption(null, null, Options.UO__TOKEN_EXTENDS, "Object", context);
     // File option does not override cmd line
     assertEquals("java.lang.Object", Options.getTokenExtends());
 
     Options.init();
 
-    Options.setInputFileOption(null, null, Options.USEROPTION__TOKEN_EXTENDS, "Object", context);
+    Options.processGrammarFileOption(null, null, Options.UO__TOKEN_EXTENDS, "Object", context);
     assertEquals("Object", Options.getTokenExtends());
-    Options.setCmdLineOption("-TOKEN_EXTENDS=java.lang.Object");
+    Options.processCmdLineOption("-TOKEN_EXTENDS=java.lang.Object");
     assertEquals("java.lang.Object", Options.getTokenExtends());
   }
 
@@ -119,7 +119,7 @@ public final class OptionsTest extends TestCase {
     Context context = new Context();
 
     assertEquals(0, context.errors().get_warning_count());
-    Options.setInputFileOption(null, null, "NONEXISTENTOPTION", Boolean.TRUE, context);
+    Options.processGrammarFileOption(null, null, "NONEXISTENTOPTION", Boolean.TRUE, context);
     assertEquals(1, context.errors().get_warning_count());
 
     assertEquals(0, context.errors().get_error_count());
@@ -133,7 +133,7 @@ public final class OptionsTest extends TestCase {
 
     assertEquals(0, context.errors().get_warning_count());
     assertEquals(0, context.errors().get_error_count());
-    Options.setInputFileOption(null, null, Options.USEROPTION__STATIC, new Integer(8), context);
+    Options.processGrammarFileOption(null, null, Options.UO__STATIC, new Integer(8), context);
     assertEquals(1, context.errors().get_warning_count());
 
     assertEquals(0, context.errors().get_error_count());
@@ -148,7 +148,7 @@ public final class OptionsTest extends TestCase {
     assertEquals(false, Options.getDebugLookahead());
     assertEquals(false, Options.getDebugParser());
 
-    Options.setCmdLineOption("-DEBUG_LOOKAHEAD=TRUE");
+    Options.processCmdLineOption("-DEBUG_LOOKAHEAD=TRUE");
     Options.normalize(context);
 
     assertEquals(true, Options.getDebugLookahead());
@@ -163,10 +163,10 @@ public final class OptionsTest extends TestCase {
   public void testOptionsString() throws ParseException {
     Options.init();
 
-    Options.setCmdLineOption("-STATIC=False");
-    Options.setCmdLineOption("-IGNORE_CASE=True");
-    String[] options = { Options.USEROPTION__STATIC, Options.USEROPTION__IGNORE_CASE };
-    String optionString = Options.getOptionsString(options);
+    Options.processCmdLineOption("-STATIC=False");
+    Options.processCmdLineOption("-IGNORE_CASE=True");
+    String[] options = { Options.UO__STATIC, Options.UO__IGNORE_CASE };
+    String optionString = Options.fmtOptionsArray(options);
     assertEquals("STATIC=false,IGNORE_CASE=true", optionString);
   }
 }

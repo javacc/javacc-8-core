@@ -25,15 +25,15 @@ public class JavaCCInterpreter {
   public static void main(String[] args) throws Exception {
     // Initialize all static state
     Context context = Main.reInitAll();
-    Options.set(Options.NONUSER_OPTION__INTERPRETER, true);
+    Options.set(Options.NUO__INTERPRETER, true);
     Options.set("STATIC", false);
     // TODO JavaCCParser parser = null;
     for (int arg = 0; arg < (args.length - 2); arg++) {
-      if (!Options.isOption(args[arg])) {
+      if (!Options.canArgBeAnOption(args[arg])) {
         System.out.println("Argument \"" + args[arg] + "\" must be an option setting.");
         System.exit(1);
       }
-      Options.setCmdLineOption(args[arg]);
+      Options.processCmdLineOption(args[arg]);
     }
 
     String input = "";
@@ -68,7 +68,7 @@ public class JavaCCInterpreter {
       JavaCCParser parser = new JavaCCParser(new StringReader(grammar));
       parser.javacc_input(context);
       // Options.init();
-      Options.set(Options.NONUSER_OPTION__INTERPRETER, true);
+      Options.set(Options.NUO__INTERPRETER, true);
       Semanticize.start(context);
       LexGen lg = new LexGen(context);
       TokenizerData tokenizerData = lg.generateTokenizerData(true, false);

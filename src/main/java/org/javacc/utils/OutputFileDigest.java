@@ -160,7 +160,7 @@ abstract class OutputFileDigest {
       String line;
       while ((line = reader.readLine()) != null) {
         if (line.startsWith("/* JavaCCOptions:")) {
-          String currentOptions = Options.getOptionsString(options);
+          String currentOptions = Options.fmtOptionsArray(options);
           if (line.indexOf(currentOptions) == -1) {
             context.errors()
             .warning(file.getName() + ": Generated using incompatible options. Please rename or delete this file so"
