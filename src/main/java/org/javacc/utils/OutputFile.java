@@ -1,14 +1,20 @@
 /*
- * Copyright (c) 2007, Paul Cager. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * Copyright (c) 2007, Paul Cager.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -19,16 +25,10 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.utils;
-
-import org.javacc.Version;
-import org.javacc.parser.Context;
-import org.javacc.parser.JavaCCGlobals;
-import org.javacc.parser.Options;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
@@ -40,35 +40,40 @@ import java.io.PrintWriter;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import org.javacc.Version;
+import org.javacc.parser.Context;
+import org.javacc.parser.JavaCCGlobals;
+import org.javacc.parser.Options;
 
 /**
- * This class handles the creation and maintenance of the boiler-plate classes,
- * such as Token.java, JavaCharStream.java etc.
+ * This class handles the creation and maintenance of the boiler-plate classes, such as Token.java,
+ * JavaCharStream.java etc.
  *
- * It is responsible for:
+ * <p>It is responsible for:
  *
- * <ul> <li>Writing the JavaCC header lines to the file.</li> <li>Writing the
- * checksum line.</li> <li>Using the checksum to determine if an existing file
- * has been changed by the user (and so should be left alone).</li> <li>Checking
- * any existing file's version (if the file can not be overwritten).</li>
- * <li>Checking any existing file's creation options (if the file can not be
- * overwritten).</li> <li></li> </ul>
+ * <ul>
+ *   <li>Writing the JavaCC header lines to the file.
+ *   <li>Writing the checksum line.
+ *   <li>Using the checksum to determine if an existing file has been changed by the user (and so
+ *       should be left alone).
+ *   <li>Checking any existing file's version (if the file can not be overwritten).
+ *   <li>Checking any existing file's creation options (if the file can not be overwritten).
+ *   <li>
+ * </ul>
  *
  * @author Paul Cager
- *
  */
 class OutputFile implements Closeable {
 
-  private final File         file;
+  private final File file;
   private final List<String> options;
 
-  private final String       toolName;
-  private final String       compatibleVersion;
-  private final boolean      needToWrite;
-
+  private final String toolName;
+  private final String compatibleVersion;
+  private final boolean needToWrite;
 
   private TrapClosePrintWriter writer;
-  private DigestOutputStream   digestStream;
+  private DigestOutputStream digestStream;
 
   /**
    * Create a new OutputFile.
@@ -76,11 +81,17 @@ class OutputFile implements Closeable {
    * @param file the file to write to.
    * @param toolName the name of the generating tool.
    * @param compatibleVersion the minimum compatible JavaCC version.
-   * @param options if the file already exists, and cannot be overwritten, this
-   *        is a list of options (such s STATIC=false) to check for changes.
+   * @param options if the file already exists, and cannot be overwritten, this is a list of options
+   *     (such s STATIC=false) to check for changes.
    * @throws IOException
    */
-  OutputFile(File file, String toolName, String compatibleVersion, List<String> options, Context context) throws IOException {
+  OutputFile(
+      final File file,
+      final String toolName,
+      final String compatibleVersion,
+      final List<String> options,
+      final Context context)
+      throws IOException {
     this.file = file;
     this.options = options;
     this.compatibleVersion = compatibleVersion;
@@ -88,33 +99,38 @@ class OutputFile implements Closeable {
     needToWrite = OutputFileDigest.check(file, toolName, compatibleVersion, options, context);
   }
 
-  /**
-   * Return <code>true</code> if the file needs to be written.
-   */
+  /** Return <code>true</code> if the file needs to be written. */
   public final boolean isNeedToWrite() {
     return needToWrite;
   }
 
   /**
-   * Return a PrintWriter object that may be used to write to this file. Any
-   * necessary header information is written by this method.
+   * Return a PrintWriter object that may be used to write to this file. Any necessary header
+   * information is written by this method.
    *
    * @throws IOException
    */
   public final PrintWriter getPrintWriter() throws IOException {
     if (writer == null) {
       try {
-        String version = compatibleVersion == null ? Version.fullVersion : compatibleVersion;
-        OutputStream ostream = new BufferedOutputStream(new FileOutputStream(file));
+        final String version = compatibleVersion == null ? Version.fullVersion : compatibleVersion;
+        final OutputStream ostream = new BufferedOutputStream(new FileOutputStream(file));
 
         digestStream = OutputFileDigest.getDigestStream(ostream);
         writer = new TrapClosePrintWriter(digestStream);
-        writer.println("/* " + JavaCCGlobals.getIdString(toolName, file.getName()) + " Version " + version + " */");
+        writer.println(
+            "/* "
+                + JavaCCGlobals.getIdString(toolName, file.getName())
+                + " Version "
+                + version
+                + " */");
         if (!options.isEmpty()) {
           writer.println(
-              "/* JavaCCOptions:" + Options.fmtOptionsArray(options.toArray(new String[options.size()])) + " */");
+              "/* JavaCCOptions:"
+                  + Options.fmtOptionsArray(options.toArray(new String[options.size()]))
+                  + " */");
         }
-      } catch (NoSuchAlgorithmException e) {
+      } catch (final NoSuchAlgorithmException e) {
         throw (IOException) new IOException("No MD5 implementation").initCause(e);
       }
     }
@@ -122,8 +138,7 @@ class OutputFile implements Closeable {
   }
 
   /**
-   * Close the OutputFile, writing any necessary trailer information (such as a
-   * checksum).
+   * Close the OutputFile, writing any necessary trailer information (such as a checksum).
    *
    * @throws IOException
    */
@@ -139,12 +154,12 @@ class OutputFile implements Closeable {
   }
 
   /**
-   * The {@link TrapClosePrintWriter} implements a {@link PrintWriter}, avoiding
-   * to close the related {@link OutputStream} with an {@link #close()}.
+   * The {@link TrapClosePrintWriter} implements a {@link PrintWriter}, avoiding to close the
+   * related {@link OutputStream} with an {@link #close()}.
    */
   private class TrapClosePrintWriter extends PrintWriter {
 
-    public TrapClosePrintWriter(OutputStream os) {
+    public TrapClosePrintWriter(final OutputStream os) {
       super(os);
     }
 
@@ -156,7 +171,7 @@ class OutputFile implements Closeable {
     public void close() {
       try {
         OutputFile.this.close();
-      } catch (IOException e) {
+      } catch (final IOException e) {
         System.err.println("Could not close " + file.getAbsolutePath());
       }
     }

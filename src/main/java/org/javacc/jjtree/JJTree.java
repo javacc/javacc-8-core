@@ -27,91 +27,81 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjtree;
-
-import org.javacc.parser.CodeGenerator;
-import org.javacc.parser.JavaCCGlobals;
-import org.javacc.parser.Options;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import org.javacc.parser.CodeGenerator;
+import org.javacc.parser.JavaCCGlobals;
+import org.javacc.parser.Options;
 
 public class JJTree {
 
   private IO io;
 
-  private void p(String s) {
+  private void p(final String s) {
     io.getMsg().println(s);
   }
 
-  private void help_message() {
+  private void printUsage() {
     p("Usage:");
     p("    jjtree option-settings inputfile");
     p("");
     p("\"option-settings\" is a sequence of settings separated by spaces.");
     p("Each option setting must be of one of the following forms:");
     p("");
-    p("    -optionname=value (e.g., -STATIC=false)");
-    p("    -optionname:value (e.g., -STATIC:false)");
-    p("    -optionname       (equivalent to -optionname=true.  e.g., -STATIC)");
-    p("    -NOoptionname     (equivalent to -optionname=false. e.g., -NOSTATIC)");
+    p("    -optionname=value (e.g. -STATIC=false)");
+    p("    -optionname:value (e.g. -STATIC:false)");
+    p("    -optionname       (same as -optionname=true;  e.g. -STATIC)");
+    p("    -NOoptionname     (same as -optionname=false; e.g. -NOSTATIC)");
     p("");
-    p("Option settings are not case-sensitive, so one can say \"-nOsTaTiC\" instead");
-    p("of \"-NOSTATIC\".  Option values must be appropriate for the corresponding");
-    p("option, and must be either an integer or a string value.");
+    p("Option names are case-insensitive, so one can use \"-nOsTaTiC\" instead of \"-NOSTATIC\".");
+    p("Option values must be appropriate for the corresponding option,");
+    p(" and must be either an integer, a boolean or a string value.");
     p("");
-
-    p("The boolean valued options are:");
+    p("The boolean valued JJTree-specific options are:");
     p("");
-    p("    STATIC                   (default true)");
-    p("    MULTI                    (default false)");
-    p("    NODE_DEFAULT_VOID        (default false)");
-    p("    NODE_SCOPE_HOOK          (default false)");
-    p("    NODE_USES_PARSER         (default false)");
-    p("    BUILD_NODE_FILES         (default true)");
-    p("    TRACK_TOKENS             (default false)");
-    p("    VISITOR                  (default false)");
+    p("    BUILD_NODE_FILES         (default: true )");
+    p("    MULTI                    (default: false)");
+    p("    NODE_DEFAULT_VOID        (default: false)");
+    p("    NODE_SCOPE_HOOK          (default: false)");
+    p("    NODE_USES_PARSER         (default: false)");
+    p("    TRACK_TOKENS             (default: false)");
+    p("    VISITOR                  (default: false)");
     p("");
-    p("The string valued options are:");
+    p("The string valued JJTree-specific options are:");
     p("");
-    p("    JDK_VERSION              (default \"1.5\")");
-    p("    NODE_CLASS               (default \"\")");
-    p("    NODE_PREFIX              (default \"AST\")");
-    p("    NODE_PACKAGE             (default \"\")");
-    p("    NODE_EXTENDS             (default \"\")");
-    p("    NODE_FACTORY             (default \"\")");
-    p("    OUTPUT_FILE              (default remove input file suffix, add .jj)");
-    p("    OUTPUT_DIRECTORY         (default \"\")");
-    p("    JJTREE_OUTPUT_DIRECTORY  (default value of OUTPUT_DIRECTORY option)");
-    p("    NODE_DIRECTORY           (default value of JJTREE_OUTPUT_DIRECTORY option)");
-    p("    VISITOR_DATA_TYPE        (default \"\")");
-    p("    VISITOR_RETURN_TYPE      (default \"Object\")");
-    p("    VISITOR_EXCEPTION        (default \"\")");
+    p("    JJTREE_OUTPUT_DIRECTORY  (default: value of (JavaCC) OUTPUT_DIRECTORY option)");
+    p("    NODE_CLASS               (default: \"\")");
+    p("    NODE_DIRECTORY           (default: value of JJTREE_OUTPUT_DIRECTORY option)");
+    p("    NODE_EXTENDS             (default: \"\")");
+    p("    NODE_FACTORY             (default: \"\")");
+    p("    NODE_PACKAGE             (default: \"\")");
+    p("    NODE_PREFIX              (default: \"AST\")");
+    p("    OUTPUT_FILE              (default: replace input file suffix by .jj)");
+    p("    VISITOR_DATA_TYPE        (default: \"\")");
+    p("    VISITOR_EXCEPTION        (default: \"\")");
+    p("    VISITOR_RETURN_TYPE      (default: \"Object\")");
     p("");
-    p("JJTree also accepts JavaCC options, which it inserts into the generated file.");
+    p("JJTree accepts all JavaCC options, and inserts them into the generated file;");
+    p(" it also uses the following ones:");
     p("");
-
+    p("    IGNORE_ACTIONS           (default: false)");
+    p("    NAMESPACE                (default: \"\")");
+    p("    OUTPUT_DIRECTORY         (default: \".\")");
+    p("    STATIC                   (default: true )");
+    p("");
     p("EXAMPLES:");
-    p("    jjtree -STATIC=false mygrammar.jjt");
-    p("");
-    p("ABOUT JJTree:");
-    p("    JJTree is a preprocessor for JavaCC that inserts actions into a");
-    p("    JavaCC grammar to build parse trees for the input.");
-    p("");
-    p("    For more information, see the online JJTree documentation at ");
-    p("    https://javacc.dev.java.net/doc/JJTree.html ");
+    p("    jjtree -STATIC=false -VISITOR_RETURN_TYPE=\"my.pkg.type\" mygrammar.jjt");
     p("");
   }
 
-  /**
-   * A main program that exercises the parser.
-   */
-  public int main(String args[]) {
+  /** A main program that exercises the parser. */
+  public int main(final String args[]) {
 
     // initialize static state for allowing repeat runs without exiting
-    ASTNodeDescriptor.nodeIds = new ArrayList<>();
+    //    ASTNodeDescriptor.nodeIds = new ArrayList<>();
     ASTNodeDescriptor.nodeNames = new ArrayList<>();
     ASTNodeDescriptor.nodeSeen = new Hashtable<>();
     org.javacc.parser.Main.reInitAll();
@@ -121,18 +111,18 @@ public class JJTree {
     io = new IO();
 
     try {
-      JJTreeContext context = new JJTreeContext();
+      final JJTreeContext context = new JJTreeContext();
       JJTreeGlobals.initialize();
 
       if (args.length == 0) {
         p("");
-        help_message();
+        printUsage();
         return 1;
       } else {
         p("(type \"jjtree\" with no arguments for help)");
       }
 
-      String fn = args[args.length - 1];
+      final String fn = args[args.length - 1];
 
       if (Options.canArgBeAnOption(fn)) {
         p("Last argument \"" + fn + "\" is not a filename");
@@ -150,7 +140,7 @@ public class JJTree {
 
       try {
         io.setInput(fn);
-      } catch (JJTreeIOException ioe) {
+      } catch (final JJTreeIOException ioe) {
         p("Error setting input: " + ioe.getMessage());
         return 1;
       }
@@ -160,16 +150,16 @@ public class JJTree {
       JJTreeGlobals.toolList.add("JJTree");
 
       try {
-        JJTreeParser parser = new JJTreeParser(io.getIn());
+        final JJTreeParser parser = new JJTreeParser(io.getIn());
         parser.javacc_input(context);
 
-        ASTGrammar root = (ASTGrammar) parser.jjtree.rootNode();
+        final ASTGrammar root = (ASTGrammar) parser.jjtree.rootNode();
         if (Boolean.getBoolean("jjtree-dump")) {
           root.dump(" ");
         }
         try {
           io.setOutput(context);
-        } catch (JJTreeIOException ioe) {
+        } catch (final JJTreeIOException ioe) {
           p("Error setting output: " + ioe.getMessage());
           return 1;
         }
@@ -177,10 +167,10 @@ public class JJTree {
         io.getOut().close();
         p("Annotated grammar generated successfully in " + io.getOutputFileName());
 
-      } catch (ParseException pe) {
+      } catch (final ParseException pe) {
         p("Error parsing input: " + pe.toString());
         return 1;
-      } catch (Exception e) {
+      } catch (final Exception e) {
         p("Error parsing input: " + e.toString());
         e.printStackTrace(io.getMsg());
         return 1;
@@ -193,19 +183,20 @@ public class JJTree {
     }
   }
 
-  private static void generateIO(IO io, ASTGrammar grammar, JJTreeContext context) throws IOException {
+  private static void generateIO(final IO io, final ASTGrammar grammar, final JJTreeContext context)
+      throws IOException {
     // TODO :: CBA -- Require Unification of output language specific processing
     // into a single Enum class
-    CodeGenerator cg = context.getCodeGenerator();
+    final CodeGenerator cg = context.getCodeGenerator();
     if (cg != null) {
       cg.getJJTreeCodeGenerator(context).visit(grammar, io);
       cg.getJJTreeCodeGenerator(context).generateHelperFiles();
     } else {
       // Catch all to ensure we don't accidently do nothing
-      throw new RuntimeException("No valid CodeGenerator for JJTree : " + Options.getCodeGenerator());
+      throw new RuntimeException(
+          "No valid CodeGenerator for JJTree : " + Options.getCodeGenerator());
     }
   }
-
 }
 
 /* end */

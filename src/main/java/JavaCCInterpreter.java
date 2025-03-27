@@ -25,7 +25,7 @@ public class JavaCCInterpreter {
   public static void main(String[] args) throws Exception {
     // Initialize all static state
     Context context = Main.reInitAll();
-    Options.set(Options.NUO__INTERPRETER, true);
+    Options.set(Options.NUO__INTERPRETER_MODE, true);
     Options.set("STATIC", false);
     // TODO JavaCCParser parser = null;
     for (int arg = 0; arg < (args.length - 2); arg++) {
@@ -68,7 +68,7 @@ public class JavaCCInterpreter {
       JavaCCParser parser = new JavaCCParser(new StringReader(grammar));
       parser.javacc_input(context);
       // Options.init();
-      Options.set(Options.NUO__INTERPRETER, true);
+      Options.set(Options.NUO__INTERPRETER_MODE, true);
       Semanticize.start(context);
       LexGen lg = new LexGen(context);
       TokenizerData tokenizerData = lg.generateTokenizerData(true, false);

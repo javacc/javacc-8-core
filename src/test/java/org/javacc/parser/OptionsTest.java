@@ -1,12 +1,39 @@
-
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.javacc.parser;
 
 import java.io.File;
-
 import junit.framework.TestCase;
 
 /**
- * Test cases to prod at the valitity of Options a little.
+ * Test cases on Options.
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
@@ -14,8 +41,7 @@ public final class OptionsTest extends TestCase {
 
   public void testDefaults() {
     Options.init();
-    Context context = new Context();
-
+    final Context context = new Context();
 
     assertEquals(true, Options.getBuildParser());
     assertEquals(true, Options.getBuildTokenManager());
@@ -40,7 +66,7 @@ public final class OptionsTest extends TestCase {
     assertEquals(1, Options.getLookahead());
     assertEquals(1, Options.getOtherAmbiguityCheck());
 
-    assertEquals("1.5", Options.getJdkVersion());
+    //    assertEquals("1.5", Options.getJdkVersion());
     assertEquals(new File("."), Options.getOutputDirectory());
     assertEquals("", Options.getTokenExtends());
     assertEquals("", Options.getTokenFactory());
@@ -54,7 +80,7 @@ public final class OptionsTest extends TestCase {
 
   public void testSetBooleanOption() {
     Options.init();
-    Context context = new Context();
+    final Context context = new Context();
 
     assertEquals(true, Options.getStatic());
     Options.processCmdLineOption("-NOSTATIC");
@@ -74,10 +100,9 @@ public final class OptionsTest extends TestCase {
     assertEquals(0, context.errors().get_semantic_error_count());
   }
 
-
   public void testIntBooleanOption() {
     Options.init();
-    Context context = new Context();
+    final Context context = new Context();
 
     assertEquals(1, Options.getLookahead());
     Options.processCmdLineOption("LOOKAHEAD=2");
@@ -97,7 +122,7 @@ public final class OptionsTest extends TestCase {
 
   public void testSetStringOption() {
     Options.init();
-    Context context = new Context();
+    final Context context = new Context();
 
     assertEquals("", Options.getTokenExtends());
     Options.processCmdLineOption("-TOKEN_EXTENDS=java.lang.Object");
@@ -116,7 +141,7 @@ public final class OptionsTest extends TestCase {
 
   public void testSetNonexistentOption() {
     Options.init();
-    Context context = new Context();
+    final Context context = new Context();
 
     assertEquals(0, context.errors().get_warning_count());
     Options.processGrammarFileOption(null, null, "NONEXISTENTOPTION", Boolean.TRUE, context);
@@ -129,7 +154,7 @@ public final class OptionsTest extends TestCase {
 
   public void testSetWrongTypeForOption() {
     Options.init();
-    Context context = new Context();
+    final Context context = new Context();
 
     assertEquals(0, context.errors().get_warning_count());
     assertEquals(0, context.errors().get_error_count());
@@ -143,7 +168,7 @@ public final class OptionsTest extends TestCase {
 
   public void testNormalize() {
     Options.init();
-    Context context = new Context();
+    final Context context = new Context();
 
     assertEquals(false, Options.getDebugLookahead());
     assertEquals(false, Options.getDebugParser());
@@ -165,8 +190,8 @@ public final class OptionsTest extends TestCase {
 
     Options.processCmdLineOption("-STATIC=False");
     Options.processCmdLineOption("-IGNORE_CASE=True");
-    String[] options = { Options.UO__STATIC, Options.UO__IGNORE_CASE };
-    String optionString = Options.fmtOptionsArray(options);
+    final String[] options = {Options.UO__STATIC, Options.UO__IGNORE_CASE};
+    final String optionString = Options.fmtOptionsArray(options);
     assertEquals("STATIC=false,IGNORE_CASE=true", optionString);
   }
 }

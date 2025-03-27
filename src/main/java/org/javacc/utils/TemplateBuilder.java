@@ -1,14 +1,20 @@
 /*
- * Copyright (c) 2008, Paul Cager. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * Copyright (c) 2008, Paul Cager.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -19,13 +25,10 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.utils;
-
-import org.javacc.parser.CodeGeneratorSettings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,28 +36,27 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import org.javacc.parser.CodeGeneratorSettings;
 
 /**
- * Generates boiler-plate files from templates. Only very basic template
- * processing is supplied - if we need something more sophisticated I suggest we
- * use a third-party library.
+ * Generates boiler-plate files from templates. Only very basic template processing is supplied - if
+ * we need something more sophisticated I suggest we use a third-party library.
  *
  * @author paulcager
  * @since 4.2
  */
 class TemplateBuilder {
 
-  private final String                template;
+  private final String template;
   private final CodeGeneratorSettings options;
-
 
   private String currentLine;
 
   /**
-   * @param template the template. E.g. "/templates/Token.template".
+   * @param template the template. E.g. "/templates/java/Token.template".
    * @param options the processing options in force, such as "STATIC=yes"
    */
-  TemplateBuilder(String template, CodeGeneratorSettings options) {
+  TemplateBuilder(final String template, final CodeGeneratorSettings options) {
     this.template = template;
     this.options = options;
   }
@@ -65,8 +67,8 @@ class TemplateBuilder {
    * @param writer
    * @throws IOException
    */
-  public void generate(PrintWriter writer) throws IOException {
-    InputStream istream = getClass().getResourceAsStream(template);
+  public void generate(final PrintWriter writer) throws IOException {
+    final InputStream istream = getClass().getResourceAsStream(template);
     if (istream == null) {
       throw new IOException("Invalid template name: " + template);
     }
@@ -75,15 +77,15 @@ class TemplateBuilder {
     }
   }
 
-  private String peekLine(BufferedReader in) throws IOException {
+  private String peekLine(final BufferedReader in) throws IOException {
     if (currentLine == null) {
       currentLine = in.readLine();
     }
     return currentLine;
   }
 
-  private String getLine(BufferedReader in) throws IOException {
-    String line = currentLine;
+  private String getLine(final BufferedReader in) throws IOException {
+    final String line = currentLine;
     currentLine = null;
 
     if (line == null) {
@@ -97,12 +99,12 @@ class TemplateBuilder {
 
     try {
       return new ConditionParser(new StringReader(condition)).CompilationUnit(options);
-    } catch (ParseException e) {
+    } catch (final ParseException e) {
       return false;
     }
   }
 
-  private String substitute(String text) throws IOException {
+  private String substitute(final String text) throws IOException {
     int startPos;
 
     if ((startPos = text.indexOf("${")) == -1) {
@@ -133,13 +135,19 @@ class TemplateBuilder {
     String value = null;
 
     for (int i = 0; i < variableExpression.length(); i++) {
-      char ch = variableExpression.charAt(i);
+      final char ch = variableExpression.charAt(i);
 
-      if ((ch == ':') && (i < (variableExpression.length() - 1)) && (variableExpression.charAt(i + 1) == '-')) {
-        value = substituteWithDefault(variableExpression.substring(0, i), variableExpression.substring(i + 2));
+      if ((ch == ':')
+          && (i < (variableExpression.length() - 1))
+          && (variableExpression.charAt(i + 1) == '-')) {
+        value =
+            substituteWithDefault(
+                variableExpression.substring(0, i), variableExpression.substring(i + 2));
         break;
       } else if (ch == '?') {
-        value = substituteWithConditional(variableExpression.substring(0, i), variableExpression.substring(i + 1));
+        value =
+            substituteWithConditional(
+                variableExpression.substring(0, i), variableExpression.substring(i + 1));
         break;
       } else if ((ch != '_') && !Character.isJavaIdentifierPart(ch)) {
         throw new IOException("Invalid variable in " + text);
@@ -159,10 +167,11 @@ class TemplateBuilder {
    * @return
    * @throws IOException
    */
-  private String substituteWithConditional(String variableName, String values) throws IOException {
+  private String substituteWithConditional(final String variableName, final String values)
+      throws IOException {
     // Split values into true and false values.
 
-    int pos = values.indexOf(':');
+    final int pos = values.indexOf(':');
     if (pos == -1) {
       throw new IOException("No ':' separator in " + values);
     }
@@ -179,8 +188,9 @@ class TemplateBuilder {
    * @param defaultValue
    * @return
    */
-  private String substituteWithDefault(String variableName, String defaultValue) throws IOException {
-    Object obj = options.get(variableName.trim());
+  private String substituteWithDefault(final String variableName, final String defaultValue)
+      throws IOException {
+    final Object obj = options.get(variableName.trim());
     if ((obj == null) || (obj.toString().length() == 0)) {
       return substitute(defaultValue);
     }
@@ -188,7 +198,7 @@ class TemplateBuilder {
     return obj.toString();
   }
 
-  private void write(PrintWriter out, String text) throws IOException {
+  private void write(final PrintWriter out, String text) throws IOException {
     while (text.indexOf("${") != -1) {
       text = substitute(text);
     }
@@ -196,13 +206,14 @@ class TemplateBuilder {
     // TODO :: Added by Sreenivas on 12 June 2013 for 6.0 release, merged in to
     // 6.1 release for sake of compatibility by cainsley ... This needs to be
     // removed urgently!!!
-//    if (text.startsWith("\\#")) { // Hack to escape # for C++
-//      text = text.substring(1);
-//    }
+    //    if (text.startsWith("\\#")) { // Hack to escape # for C++
+    //      text = text.substring(1);
+    //    }
     out.println(text.replace("\\#", "#"));
   }
 
-  private void process(BufferedReader in, PrintWriter out, boolean ignoring) throws IOException {
+  private void process(final BufferedReader in, final PrintWriter out, final boolean ignoring)
+      throws IOException {
     // out.println("*** process ignore=" + ignoring + " : " + peekLine(in));
     while (peekLine(in) != null) {
       if (peekLine(in).trim().startsWith("#if")) {
@@ -210,7 +221,7 @@ class TemplateBuilder {
       } else if (peekLine(in).trim().startsWith("#")) {
         break;
       } else {
-        String line = getLine(in);
+        final String line = getLine(in);
         if (!ignoring) {
           write(out, line);
         }
@@ -220,7 +231,8 @@ class TemplateBuilder {
     out.flush();
   }
 
-  private void processIf(BufferedReader in, PrintWriter out, boolean ignoring) throws IOException {
+  private void processIf(final BufferedReader in, final PrintWriter out, final boolean ignoring)
+      throws IOException {
     String line = getLine(in).trim();
     assert line.trim().startsWith("#if");
     boolean foundTrueCondition = false;

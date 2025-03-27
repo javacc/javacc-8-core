@@ -28,13 +28,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjtree;
 
+import java.io.File;
 import org.javacc.parser.Options;
 
-import java.io.File;
-
+// TODO refactor Options / JJTreeOptions / JJTreeContext to make them consistent.
 /**
  * The JJTree-specific options.
  *
@@ -42,58 +41,25 @@ import java.io.File;
  */
 public class JJTreeOptions extends Options {
 
-  /**
-   * Limit subclassing to derived classes.
-   */
+  /** Limit subclassing to derived classes. */
   protected JJTreeOptions() {}
 
   /**
-   * Find the multi value.
+   * Compute the directory of the AST nodes (java / gen, cpp / gen).
    *
-   * @return The requested multi value.
+   * @return the requested node directory directory
    */
-  public final boolean getMulti() {
-    return Options.booleanValue("MULTI");
+  public final File getASTNodeDirectory() {
+    final String dirName = Options.stringValue("NODE_DIRECTORY");
+    if ("".equals(dirName)) {
+      return getJJTreeOutputDirectory();
+    } else {
+      return new File(dirName);
+    }
   }
 
   /**
-   * Find the node default void value.
-   *
-   * @return The requested node default void value.
-   */
-  public final boolean getNodeDefaultVoid() {
-    return Options.booleanValue("NODE_DEFAULT_VOID");
-  }
-
-  /**
-   * Find the node scope hook value.
-   *
-   * @return The requested node scope hook value.
-   */
-  public final boolean getNodeScopeHook() {
-    return Options.booleanValue("NODE_SCOPE_HOOK");
-  }
-
-  /**
-   * Find the node factory value.
-   *
-   * @return The requested node factory value.
-   */
-  public final String getNodeFactory() {
-    return Options.stringValue("NODE_FACTORY");
-  }
-
-  /**
-   * Find the node uses parser value.
-   *
-   * @return The requested node uses parser value.
-   */
-  public final boolean getNodeUsesParser() {
-    return Options.booleanValue("NODE_USES_PARSER");
-  }
-
-  /**
-   * Find the build node files value.
+   * Find the build node files value (core).
    *
    * @return The requested build node files value.
    */
@@ -102,43 +68,41 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the visitor value.
+   * Find the output directory to place the generated <code>.jj</code> files into.<br>
+   * If none is configured, use the value of <code>getOutputDirectory()</code>.<br>
+   * (java / gen, csharp / gen, cpp / gen).
    *
-   * @return The requested visitor value.
+   * @return The requested JJTree output directory
    */
-  public final boolean getVisitor() {
-    return Options.booleanValue("VISITOR");
+  public final File getJJTreeOutputDirectory() {
+    final String dirName = Options.stringValue("JJTREE_OUTPUT_DIRECTORY");
+    if ("".equals(dirName)) {
+      return Options.getOutputDirectory();
+    } else {
+      return new File(dirName);
+    }
   }
 
   /**
-   * Find the trackTokens value.
+   * Find the multi value (java / gen, csharp / gen, cpp / gen).
    *
-   * @return The requested trackTokens value.
+   * @return The requested multi value.
    */
-  public final boolean getTrackTokens() {
-    return Options.booleanValue("TRACK_TOKENS");
+  public final boolean getMulti() {
+    return Options.booleanValue("MULTI");
   }
 
   /**
-   * Find the node prefix value.
+   * Find the node default void value (core, -> java, csharp, cpp).
    *
-   * @return The requested node prefix value.
+   * @return The requested node default void value.
    */
-  public final String getNodePrefix() {
-    return Options.stringValue("NODE_PREFIX");
+  public final boolean getNodeDefaultVoid() {
+    return Options.booleanValue("NODE_DEFAULT_VOID");
   }
 
   /**
-   * Find the node super class name.
-   *
-   * @return The requested node super class
-   */
-  public final String getNodeExtends() {
-    return Options.stringValue("NODE_EXTENDS");
-  }
-
-  /**
-   * Find the node class name.
+   * Find the node class name (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The requested node class
    */
@@ -147,7 +111,34 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the node package value.
+   * Find the node super class name (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
+   *
+   * @return The requested node super class
+   */
+  public final String getNodeExtends() {
+    return Options.stringValue("NODE_EXTENDS");
+  }
+
+  /**
+   * Find the node factory value (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
+   *
+   * @return The requested node factory value.
+   */
+  public final String getNodeFactory() {
+    return Options.stringValue("NODE_FACTORY");
+  }
+
+  /**
+   * Find the node includes value (cpp / tpl).
+   *
+   * @return The requested node includes value.
+   */
+  public final String getNodeIncludes() {
+    return Options.stringValue("NODE_INCLUDES");
+  }
+
+  /**
+   * Find the node package value (java / gen + tpl).
    *
    * @return The requested node package value.
    */
@@ -156,7 +147,34 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the output file value.
+   * Find the node prefix value (java / gen, csharp / gen, cpp / gen).
+   *
+   * @return The requested node prefix value.
+   */
+  public final String getNodePrefix() {
+    return Options.stringValue("NODE_PREFIX");
+  }
+
+  /**
+   * Find the node scope hook value (java / gen, csharp / gen, cpp / gen).
+   *
+   * @return The requested node scope hook value.
+   */
+  public final boolean getNodeScopeHook() {
+    return Options.booleanValue("NODE_SCOPE_HOOK");
+  }
+
+  /**
+   * Find the node uses parser value (java / gen, csharp / gen, cpp / gen + tpl).
+   *
+   * @return The requested node uses parser value.
+   */
+  public final boolean getNodeUsesParser() {
+    return Options.booleanValue("NODE_USES_PARSER");
+  }
+
+  /**
+   * Find the output file value (java / gen, cpp / gen).
    *
    * @return The requested output file value.
    */
@@ -165,16 +183,25 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the visitor exception value
+   * Find the trackTokens value (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
-   * @return The requested visitor exception value.
+   * @return The requested trackTokens value.
    */
-  public final String getVisitorException() {
-    return Options.stringValue("VISITOR_EXCEPTION");
+  public final boolean getTrackTokens() {
+    return Options.booleanValue("TRACK_TOKENS");
   }
 
   /**
-   * Find the visitor data type value
+   * Find the visitor value (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
+   *
+   * @return The requested visitor value.
+   */
+  public final boolean getVisitor() {
+    return Options.booleanValue("VISITOR");
+  }
+
+  /**
+   * Find the visitor data type value (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The requested visitor data type value.
    */
@@ -183,48 +210,29 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the visitor return type value
+   * Find the visitor exception value (java / gen + tpl, csharp / gen + tpl).
+   *
+   * @return The requested visitor exception value.
+   */
+  public final String getVisitorException() {
+    return Options.stringValue("VISITOR_EXCEPTION");
+  }
+
+  /**
+   * Find the visitor method name includes type name value (java / gen + tpl, csharp / gen + tpl).
+   *
+   * @return The requested visitor method name includes type name value.
+   */
+  public final String getVisitorMethodNameIncludesTypeName() {
+    return Options.stringValue("VISITOR_METHOD_NAME_INCLUDES_TYPE_NAME");
+  }
+
+  /**
+   * Find the visitor return type value (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The requested visitor return type value.
    */
   public final String getVisitorReturnType() {
     return Options.stringValue("VISITOR_RETURN_TYPE");
-  }
-
-  /**
-   * Find the output directory to place the generated <code>.jj</code> files
-   * into. If none is configured, use the value of
-   * <code>getOutputDirectory()</code>.
-   *
-   * @return The requested JJTree output directory
-   */
-  public final File getJJTreeOutputDirectory() {
-    final String dirName = Options.stringValue("JJTREE_OUTPUT_DIRECTORY");
-    File dir = null;
-
-    if ("".equals(dirName)) {
-      dir = Options.getOutputDirectory();
-    } else {
-      dir = new File(dirName);
-    }
-
-    return dir;
-  }
-
-  /**
-   * Compute where are located the ASTNodes is any are defined
-   *
-   * @return the requested NODE_DIRECTORY directory
-   */
-  public final File getASTNodeDirectory() {
-    final String dirName = Options.stringValue("NODE_DIRECTORY");
-    File dir = null;
-
-    if ("".equals(dirName)) {
-      dir = getJJTreeOutputDirectory();
-    } else {
-      dir = new File(dirName);
-    }
-    return dir;
   }
 }

@@ -11,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the names of of the copyright holders nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -42,6 +42,11 @@ import java.util.TreeSet;
 import org.javacc.utils.OptionInfo;
 import org.javacc.utils.OptionType;
 
+// TODO some code use Options.getXYZ), other use settings.get("XYZ"): not consistent;
+// also the parser should be thread-safe, so Options state should not be static.
+// TODO change do an Enum with name, short & long descriptions, allowed values, area (core /
+// generators), use (code, template...), will be deprecated, since...
+
 /** A class with static state that stores all options information. */
 public class Options {
 
@@ -50,180 +55,194 @@ public class Options {
 
   /*
    * NUO = non user option: these are options that are not directly set by the user, but indirectly
-   * via some configuration of other user of internal options
+   * via some configuration of other user of internal options; some do not have getters
    */
 
-  public static final String NUO__INTERPRETER = "INTERPRETER_MODE";
+  /** (core - JavaCCInterpreter) (no getter) */
+  public static final String NUO__INTERPRETER_MODE = "INTERPRETER_MODE";
+
+  /** (csharp / gen, cpp / gen) */
   public static final String NUO__HAS_NAMESPACE = "HAS_NAMESPACE";
+
+  /** (java / gen + tpl) */
   public static final String NUO__LEGACY_EXCEPTION_HANDLING = "LEGACY_EXCEPTION_HANDLING";
+
+  /** (csharp / gen + tpl, cpp / gen + tpl (no getter)) */
   public static final String NUO__NAMESPACE_CLOSE = "NAMESPACE_CLOSE";
+
+  /** (csharp / gen + tpl, cpp / gen + tpl) (no getter) */
   public static final String NUO__NAMESPACE_OPEN = "NAMESPACE_OPEN";
+
+  /** (core, java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl) (no getter) */
   public static final String NUO__PARSER_NAME = "PARSER_NAME";
+
+  /** (cpp / gen + tpl) (no getter) */
   public static final String NUO__PARSER_NAME_UPPER_CASE = "PARSER_NAME_UPPER_CASE";
 
   /*
    * UO = user option: these are options that are set by the user
    */
-  // TODO refaire une passe sur l'utilisation dans les templates!!!
-  /** java */
+
+  /** (core, java / gen, cpp / gen + tpl) */
   public static final String UO__BUILD_PARSER = "BUILD_PARSER";
 
-  /** java, csharp, cpp */
+  /** (core, java / gen, csharp / gen, cpp / gen + tpl) */
   public static final String UO__BUILD_TOKEN_MANAGER = "BUILD_TOKEN_MANAGER";
 
-  /** java, cpp */
-  public static final String UO__CACHE_TOKENS = "CACHE_TOKENS";
+  /** (java / gen, cpp / gen) */
+  static final String UO__CACHE_TOKENS = "CACHE_TOKENS";
 
-  /** core only */
+  /** (core) */
   static final String UO__CHOICE_AMBIGUITY_CHECK = "CHOICE_AMBIGUITY_CHECK";
 
-  /** core only */
+  /** (core) */
   static final String UO__CODE_GENERATOR = "CODE_GENERATOR";
 
-  /** core only */
+  /** (java / tpl, csharp / tpl, cpp / tpl) */
   static final String UO__COMMON_TOKEN_ACTION = "COMMON_TOKEN_ACTION";
 
-  /** java, csharp, cpp */
-  public static final String UO__DEBUG_LOOKAHEAD = "DEBUG_LOOKAHEAD";
+  /** (cpp / gen + tpl) */
+  public static final String UO__CPP_THROWS_EXCEPTIONS = "CPP_THROWS_EXCEPTIONS";
 
-  /** java, csharp, cpp */
-  public static final String UO__DEBUG_PARSER = "DEBUG_PARSER";
+  /** (cpp / gen + tpl) */
+  public static final String UO__CPP_USE_ARRAY = "CPP_USE_ARRAY";
 
-  /** core only */
+  /** (java / gen, csharp / gen + tpl, cpp / gen) */
+  static final String UO__DEBUG_LOOKAHEAD = "DEBUG_LOOKAHEAD";
+
+  /** (java / gen, csharp / gen + tpl, cpp / gen) */
+  static final String UO__DEBUG_PARSER = "DEBUG_PARSER";
+
+  /** (java / tpl, csharp / tpl, cpp / tpl) */
   static final String UO__DEBUG_TOKEN_MANAGER = "DEBUG_TOKEN_MANAGER";
 
-  /** java, cpp */
-  public static final String UO__DEPTH_LIMIT = "DEPTH_LIMIT";
+  /** (java / gen, cpp / gen) */
+  static final String UO__DEPTH_LIMIT = "DEPTH_LIMIT";
 
-  /** java, csharp, cpp */
-  public static final String UO__ERROR_REPORTING = "ERROR_REPORTING";
+  /** (java / gen, csharp / gen + tpl, cpp / TODO) */
+  static final String UO__ERROR_REPORTING = "ERROR_REPORTING";
 
-  /** core only */
+  /** (core) */
   public static final String UO__FORCE_LA_CHECK = "FORCE_LA_CHECK";
 
-  // TODO deprecate / remove
-  /** not used jdk 1.5 */
-  static final String UO__GENERATE_ANNOTATIONS = "GENERATE_ANNOTATIONS";
+  // deprecated -> removed
+  //  /** not used jdk 1.5 */
+  //  static final String UO__GENERATE_ANNOTATIONS = "GENERATE_ANNOTATIONS";
 
   // TODO remove ?
-  /** java */
+  /** (core, java / gen) */
   static final String UO__GENERATE_BOILERPLATE = "GENERATE_BOILERPLATE";
 
-  // TODO deprecate / remove
-  /** not used jdk 1.4 */
-  static final String UO__GENERATE_CHAINED_EXCEPTION = "GENERATE_CHAINED_EXCEPTION";
+  // deprecated -> removed
+  //  /** not used jdk 1.4 */
+  //  static final String UO__GENERATE_CHAINED_EXCEPTION = "GENERATE_CHAINED_EXCEPTION";
 
-  // TODO deprecate / remove
-  /** not used jdk 1.5 */
-  static final String UO__GENERATE_GENERICS = "GENERATE_GENERICS";
+  // deprecated -> removed
+  //  /** not used jdk 1.5 */
+  //  static final String UO__GENERATE_GENERICS = "GENERATE_GENERICS";
 
-  // TODO deprecate / remove
-  /** not used jdk 1.5 */
-  static final String UO__GENERATE_STRING_BUILDER = "GENERATE_STRING_BUILDER";
+  // deprecated -> removed
+  //  /** not used jdk 1.5 */
+  //  static final String UO__GENERATE_STRING_BUILDER = "GENERATE_STRING_BUILDER";
 
-  /** core only */
+  /** (core) */
   static final String UO__GRAMMAR_ENCODING = "GRAMMAR_ENCODING";
 
-  /** java, csharp, cpp */
+  /** (java / gen, csharp / gen, cpp / gen) */
   public static final String UO__IGNORE_ACTIONS = "IGNORE_ACTIONS";
 
-  /** core only */
+  /** (core, java / tpl, csharp / tpl, cpp / tpl) */
   static final String UO__IGNORE_CASE = "IGNORE_CASE";
 
-  // TODO deprecate replace table driven remove
-  /** java */
+  // TODO deprecate & remove; replace by table driven template
+  /** (java / gen) */
   public static final String UO__JAVA_TEMPLATE_TYPE = "JAVA_TEMPLATE_TYPE";
 
-  // TODO see for csharp / cpp equivalent
-  /** java */
+  /** (core, java / gen, csharp / gen + tpl) */
   public static final String UO__JAVA_UNICODE_ESCAPE = "JAVA_UNICODE_ESCAPE";
 
-  // TODO deprecate remove
-  /** core only */
-  public static final String UO__JDK_VERSION = "JDK_VERSION";
+  // deprecated -> removed
+  //  /** (core) */
+  //  public static final String UO__JDK_VERSION = "JDK_VERSION";
 
-  /** java */
+  /** (java / tpl, csharp / tpl, cpp / tpl) */
   public static final String UO__KEEP_LINE_COLUMN = "KEEP_LINE_COLUMN";
 
+  /** (cpp / gen + tpl) */
+  public static final String UO__LIBRARY = "LIBRARY";
+
+  /** (core) */
   public static final String UO__LOOKAHEAD = "LOOKAHEAD";
 
-  /** java, csharp, cpp */
+  /** (csharp / gen + tpl, cpp / gen + tpl) */
+  public static final String UO__NAMESPACE = "NAMESPACE";
+
+  /** (core, java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl) */
   public static final String UO__NO_DFA = "NO_DFA";
 
-  /** core only */
+  /** (core) */
   static final String UO__OTHER_AMBIGUITY_CHECK = "OTHER_AMBIGUITY_CHECK";
 
-  /** java, csharp, cpp */
+  /** (core, java / gen, csharp / gen, cpp / gen) */
   public static final String UO__OUTPUT_DIRECTORY = "OUTPUT_DIRECTORY";
 
-  /** core only */
+  /** (cpp / gen) */
+  public static final String UO__PARSER_INCLUDE = "PARSER_INCLUDE";
+
+  /** (core) */
   public static final String UO__SANITY_CHECK = "SANITY_CHECK";
 
-  /** java, csharp, cpp */
+  /** (cpp / gen) */
+  public static final String UO__STACK_LIMIT = "STACK_LIMIT";
+
+  /** (java / gen + tpl, csharp / gen, cpp / gen) */
   public static final String UO__STATIC = "STATIC";
 
-  /** java, csharp, cpp */
+  /** (cpp / gen) */
+  public static final String UO__STOP_ON_FIRST_ERROR = "STOP_ON_FIRST_ERROR";
+
+  /** (java / gen + tpl, csharp / tpl, cpp / gen) */
   public static final String UO__SUPPORT_CLASS_VISIBILITY_PUBLIC =
       "SUPPORT_CLASS_VISIBILITY_PUBLIC";
 
-  /** java */
-  public static final String UO__TOKEN_EXTENDS = "TOKEN_EXTENDS";
-
-  /** java, csharp */
-  public static final String UO__TOKEN_MANAGER_SUPER_CLASS = "TOKEN_MANAGER_SUPER_CLASS";
-
-  /** java, csharp, cpp */
-  public static final String UO__TOKEN_MANAGER_USES_PARSER = "TOKEN_MANAGER_USES_PARSER";
-
-  // TODO see for csharp / cpp equivalent
-  /** core only */
-  public static final String UO__UNICODE_INPUT = "UNICODE_INPUT";
-
-  /** java */
-  public static final String UO__USER_CHAR_STREAM = "USER_CHAR_STREAM";
-
-  /** java, cpp */
-  public static final String UO__USER_TOKEN_MANAGER = "USER_TOKEN_MANAGER";
-
-  /** cpp */
-  public static final String UO__LIBRARY = "LIBRARY";
-
-  /** csharp, cpp */
-  public static final String UO__NAMESPACE = "NAMESPACE";
-
-  /** cpp */
-  public static final String UO__PARSER_INCLUDE = "PARSER_INCLUDE";
-
-  /** cpp */
-  public static final String UO__STACK_LIMIT = "STACK_LIMIT";
-
-  // TODO add getter
-  /** cpp */
-  public static final String UO__STOP_ON_FIRST_ERROR = "STOP_ON_FIRST_ERROR";
-
-  /** cpp */
+  /** (cpp / gen) */
   public static final String UO__TOKEN_CLASS = "TOKEN_CLASS";
 
-  /** cpp */
+  /** (cpp / gen) */
   public static final String UO__TOKEN_CONSTANTS_INCLUDE = "TOKEN_CONSTANTS_INCLUDE";
 
-  /** cpp */
+  /** (cpp / gen) */
   public static final String UO__TOKEN_CONSTANTS_NAMESPACE = "TOKEN_CONSTANTS_NAMESPACE";
 
-  /** nowhere */
+  /** (java / tpl, csharp / tpl) */
+  public static final String UO__TOKEN_EXTENDS = "TOKEN_EXTENDS";
+
+  /** (java / tpl, csharp / tpl, cpp / tpl) */
   public static final String UO__TOKEN_FACTORY = "TOKEN_FACTORY";
 
-  /** cpp */
+  /** (cpp / gen) */
   public static final String UO__TOKEN_INCLUDE = "TOKEN_INCLUDE";
 
-  /** cpp */
+  /** (cpp / gen) */
   public static final String UO__TOKEN_MANAGER_INCLUDE = "TOKEN_MANAGER_INCLUDE";
 
-  /** cpp */
+  /** (java / gen + cpp, csharp / gen + cpp) */
+  public static final String UO__TOKEN_MANAGER_SUPER_CLASS = "TOKEN_MANAGER_SUPER_CLASS";
+
+  /** (java / gen + tpl, csharp / tpl, cpp / gen + tpl) */
+  public static final String UO__TOKEN_MANAGER_USES_PARSER = "TOKEN_MANAGER_USES_PARSER";
+
+  /** (cpp / gen) */
   public static final String UO__TOKEN_NAMESPACE = "TOKEN_NAMESPACE";
 
-  /** cpp */
-  public static final String UO__CPP_USE_ARRAY = "CPP_USE_ARRAY";
+  /** (core) */
+  public static final String UO__UNICODE_INPUT = "UNICODE_INPUT";
+
+  /** (core, java / gen + tpl, csharp / tpl, cpp / gen + tpl) */
+  public static final String UO__USER_TOKEN_MANAGER = "USER_TOKEN_MANAGER";
+
+  /** (core, java / gen + tpl) */
+  public static final String UO__USER_CHAR_STREAM = "USER_CHAR_STREAM";
 
   /*
    * UOV = user option value: these are some values of options that are set by the user
@@ -256,7 +275,6 @@ public class Options {
   private static final OptionType OT_STRING = OptionType.STRING;
 
   /* Initialize the userOptions set */
-  // TODO see why some options are not included
   static {
     final TreeSet<OptionInfo> ts = new TreeSet<>();
 
@@ -273,6 +291,7 @@ public class Options {
     ts.add(new OptionInfo(UO__CHOICE_AMBIGUITY_CHECK, OT_INTEGER, TWO_2));
     ts.add(new OptionInfo(UO__CODE_GENERATOR, OT_STRING, ""));
     ts.add(new OptionInfo(UO__COMMON_TOKEN_ACTION, OT_BOOLEAN, Boolean.FALSE));
+    ts.add(new OptionInfo(UO__CPP_THROWS_EXCEPTIONS, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__CPP_USE_ARRAY, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__DEBUG_LOOKAHEAD, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__DEBUG_PARSER, OT_BOOLEAN, Boolean.FALSE));
@@ -280,17 +299,17 @@ public class Options {
     ts.add(new OptionInfo(UO__DEPTH_LIMIT, OT_INTEGER, ZERO_0));
     ts.add(new OptionInfo(UO__ERROR_REPORTING, OT_BOOLEAN, Boolean.TRUE));
     ts.add(new OptionInfo(UO__FORCE_LA_CHECK, OT_BOOLEAN, Boolean.FALSE));
-    ts.add(new OptionInfo(UO__GENERATE_ANNOTATIONS, OT_BOOLEAN, Boolean.FALSE));
+    //    ts.add(new OptionInfo(UO__GENERATE_ANNOTATIONS, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__GENERATE_BOILERPLATE, OT_BOOLEAN, Boolean.TRUE));
-    ts.add(new OptionInfo(UO__GENERATE_CHAINED_EXCEPTION, OT_BOOLEAN, Boolean.FALSE));
-    ts.add(new OptionInfo(UO__GENERATE_GENERICS, OT_BOOLEAN, Boolean.FALSE));
-    ts.add(new OptionInfo(UO__GENERATE_STRING_BUILDER, OT_BOOLEAN, Boolean.FALSE));
+    //    ts.add(new OptionInfo(UO__GENERATE_CHAINED_EXCEPTION, OT_BOOLEAN, Boolean.FALSE));
+    //    ts.add(new OptionInfo(UO__GENERATE_GENERICS, OT_BOOLEAN, Boolean.FALSE));
+    //    ts.add(new OptionInfo(UO__GENERATE_STRING_BUILDER, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__GRAMMAR_ENCODING, OT_STRING, ""));
     ts.add(new OptionInfo(UO__IGNORE_ACTIONS, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__IGNORE_CASE, OT_BOOLEAN, Boolean.FALSE));
     ts.add(new OptionInfo(UO__JAVA_TEMPLATE_TYPE, OT_STRING, UOV__JAVA_TEMPLATE_TYPE__CLASSIC));
     ts.add(new OptionInfo(UO__JAVA_UNICODE_ESCAPE, OT_BOOLEAN, Boolean.FALSE));
-    ts.add(new OptionInfo(UO__JDK_VERSION, OT_STRING, "1.5"));
+    //    ts.add(new OptionInfo(UO__JDK_VERSION, OT_STRING, "1.5"));
     ts.add(new OptionInfo(UO__KEEP_LINE_COLUMN, OT_BOOLEAN, Boolean.TRUE));
     ts.add(new OptionInfo(UO__LIBRARY, OT_STRING, ""));
     ts.add(new OptionInfo(UO__LOOKAHEAD, OT_INTEGER, ONE_1));
@@ -638,14 +657,14 @@ public class Options {
 
     // Now set the "GENERATE" options from the supplied (or default) JDKversion
 
-    resOptions.put(UO__GENERATE_CHAINED_EXCEPTION, Boolean.valueOf(jdkVersionAtLeast(1.4)));
-    resOptions.put(UO__GENERATE_GENERICS, Boolean.valueOf(jdkVersionAtLeast(1.5)));
-    resOptions.put(UO__GENERATE_STRING_BUILDER, Boolean.valueOf(jdkVersionAtLeast(1.5)));
-    resOptions.put(UO__GENERATE_ANNOTATIONS, Boolean.valueOf(jdkVersionAtLeast(1.5)));
+    //    resOptions.put(UO__GENERATE_CHAINED_EXCEPTION, Boolean.valueOf(jdkVersionAtLeast(1.4)));
+    //    resOptions.put(UO__GENERATE_GENERICS, Boolean.valueOf(jdkVersionAtLeast(1.5)));
+    //    resOptions.put(UO__GENERATE_STRING_BUILDER, Boolean.valueOf(jdkVersionAtLeast(1.5)));
+    //    resOptions.put(UO__GENERATE_ANNOTATIONS, Boolean.valueOf(jdkVersionAtLeast(1.5)));
   }
 
   /**
-   * Find the build parser option value.
+   * Find the build parser option value (core, java / gen, cpp / gen + tpl).
    *
    * @return The build parser option value
    */
@@ -654,7 +673,7 @@ public class Options {
   }
 
   /**
-   * Find the build token manager option value.
+   * Find the build token manager option value (core, java / gen, csharp / gen, cpp / gen + tpl).
    *
    * @return The build token manager option value
    */
@@ -663,7 +682,7 @@ public class Options {
   }
 
   /**
-   * Find the cache tokens option value.
+   * Find the cache tokens option value (java / gen, cpp / gen).
    *
    * @return The cache tokens option value
    */
@@ -672,7 +691,7 @@ public class Options {
   }
 
   /**
-   * Find the the char stream name.
+   * Find the the char stream name (java / gen + tpl, csharp / gen + tpl).
    *
    * @return The char stream name
    */
@@ -685,7 +704,7 @@ public class Options {
   }
 
   /**
-   * Find the choice ambiguity check option value.
+   * Find the choice ambiguity check option value (core).
    *
    * @return The choice ambiguity check option value
    */
@@ -694,17 +713,17 @@ public class Options {
   }
 
   /**
-   * Find the code generator option value.
+   * Find the code generator option value (core).
    *
    * @return The code generator option value
    */
   public static String getCodeGenerator() {
     final String retVal = stringValue(UO__CODE_GENERATOR);
-    return booleanValue(NUO__INTERPRETER) || retVal.equals("") ? null : retVal;
+    return booleanValue(NUO__INTERPRETER_MODE) || retVal.equals("") ? null : retVal;
   }
 
   /**
-   * Find the common token action option value.
+   * Find the common token action option value (java / tpl, csharp / tpl, cpp / tpl).
    *
    * @return The common token action option value
    */
@@ -713,16 +732,16 @@ public class Options {
   }
 
   /**
-   * Find the use array option value.
+   * Find the Cpp use array option value.
    *
-   * @return The use array option value
+   * @return The Cpp use array option value
    */
   public static boolean getCppUseArray() {
     return booleanValue(UO__CPP_USE_ARRAY);
   }
 
   /**
-   * Find the debug lookahead option value.
+   * Find the debug lookahead option value (java / gen, csharp / gen + tpl, cpp / gen).
    *
    * @return The debug lookahead option value
    */
@@ -731,16 +750,7 @@ public class Options {
   }
 
   /**
-   * Find the debug token manager option value.
-   *
-   * @return The debug token manager option value
-   */
-  static boolean getDebugTokenManager() {
-    return booleanValue(UO__DEBUG_TOKEN_MANAGER);
-  }
-
-  /**
-   * Find the debug parser option value.
+   * Find the debug parser option value (java / gen, csharp / gen + tpl, cpp / gen).
    *
    * @return The debug parser option value
    */
@@ -749,7 +759,16 @@ public class Options {
   }
 
   /**
-   * Find the depth limit option value.
+   * Find the debug token manager option value (java / tpl, csharp / tpl, cpp / tpl).
+   *
+   * @return The debug token manager option value
+   */
+  static boolean getDebugTokenManager() {
+    return booleanValue(UO__DEBUG_TOKEN_MANAGER);
+  }
+
+  /**
+   * Find the depth limit option value (java / gen, cpp / gen).
    *
    * @return The depth limit option value
    */
@@ -758,7 +777,7 @@ public class Options {
   }
 
   /**
-   * Find the error reporting option value.
+   * Find the error reporting option value (java / gen, csharp / gen + tpl, cpp / TODO).
    *
    * @return The error reporting option value
    */
@@ -767,7 +786,7 @@ public class Options {
   }
 
   /**
-   * Find the force lookahead check option value.
+   * Find the force lookahead check option value (core).
    *
    * @return The force lookahead option value
    */
@@ -775,14 +794,14 @@ public class Options {
     return booleanValue(UO__FORCE_LA_CHECK);
   }
 
-  /**
-   * Find the generate annotations option value.
-   *
-   * @return The generate annotations option value
-   */
-  static boolean getGenerateAnnotations() {
-    return booleanValue(UO__GENERATE_ANNOTATIONS);
-  }
+  //  /**
+  //   * Find the generate annotations option value.
+  //   *
+  //   * @return The generate annotations option value
+  //   */
+  //  static boolean getGenerateAnnotations() {
+  //    return booleanValue(UO__GENERATE_ANNOTATIONS);
+  //  }
 
   /**
    * Find the generate boilerplate code option value.
@@ -793,49 +812,58 @@ public class Options {
     return booleanValue(UO__GENERATE_BOILERPLATE);
   }
 
-  /**
-   * Find the generate chained exception option value.
-   *
-   * @return The generate chained exception option value
-   */
-  public static boolean getGenerateChainedException() {
-    return booleanValue(UO__GENERATE_CHAINED_EXCEPTION);
-  }
+  //  /**
+  //   * Find the generate chained exception option value.
+  //   *
+  //   * @return The generate chained exception option value
+  //   */
+  //  public static boolean getGenerateChainedException() {
+  //    return booleanValue(UO__GENERATE_CHAINED_EXCEPTION);
+  //  }
 
-  /**
-   * Find the generate generics option value.
-   *
-   * @return The generate generics option value
-   */
-  public static boolean getGenerateGenerics() {
-    return booleanValue(UO__GENERATE_GENERICS);
-  }
+  //  /**
+  //   * Find the generate generics option value.
+  //   *
+  //   * @return The generate generics option value
+  //   */
+  //  public static boolean getGenerateGenerics() {
+  //    return booleanValue(UO__GENERATE_GENERICS);
+  //  }
 
-  /**
-   * Find the generate StringBuilder option value.
-   *
-   * @return The generate StringBuilder option value
-   */
-  static boolean getGenerateStringBuilder() {
-    return booleanValue(UO__GENERATE_STRING_BUILDER);
-  }
+  //  /**
+  //   * Find the generate StringBuilder option value.
+  //   *
+  //   * @return The generate StringBuilder option value
+  //   */
+  //  static boolean getGenerateStringBuilder() {
+  //    return booleanValue(UO__GENERATE_STRING_BUILDER);
+  //  }
 
   /**
    * Find the file encoding, which will be the grammar encoding option value if set, otherwise the
-   * file.encoding system property.
+   * file.encoding system property (core).
    *
    * @return The file encoding (e.g, UTF-8, ISO_8859-1, MacRoman)
    */
   public static String getGrammarEncoding() {
-    if (stringValue(UO__GRAMMAR_ENCODING).equals("")) {
+    final String ge = stringValue(UO__GRAMMAR_ENCODING);
+    if (ge.equals("")) {
       return System.getProperties().getProperty("file.encoding");
-    } else {
-      return stringValue(UO__GRAMMAR_ENCODING);
     }
+    return ge;
   }
 
   /**
-   * Find the ignore case option value.
+   * Find the ignore actions option value (java / gen, csharp / gen, cpp / gen).
+   *
+   * @return The ignore actions option value
+   */
+  public static boolean getIgnoreActions() {
+    return booleanValue(UO__IGNORE_ACTIONS);
+  }
+
+  /**
+   * Find the ignore case option value (core, java / tpl, csharp / tpl, cpp / tpl).
    *
    * @return The ignore case option value
    */
@@ -844,29 +872,16 @@ public class Options {
   }
 
   /**
-   * Find the JDK version option value.
+   * Find the Java template type option value (java / gen).
    *
-   * @return The jdk version option value
+   * @return The Java template type option value
    */
-  public static String getJdkVersion() {
-    return stringValue(UO__JDK_VERSION);
-  }
-
-  /**
-   * Find the keep line column option value.
-   *
-   * @return The keep line column option value
-   */
-  public static boolean getKeepLineColumn() {
-    return booleanValue(UO__KEEP_LINE_COLUMN);
-  }
-
   public static String getJavaTemplateType() {
     return stringValue(UO__JAVA_TEMPLATE_TYPE);
   }
 
   /**
-   * Find the Java unicode escape option value.
+   * Find the Java unicode escape option value (core, java / gen, csharp / gen + tpl).
    *
    * @return The Java unicode escape option value
    */
@@ -874,8 +889,26 @@ public class Options {
     return booleanValue(UO__JAVA_UNICODE_ESCAPE);
   }
 
+  //  /**
+  //   * Find the JDK version option value.
+  //   *
+  //   * @return The jdk version option value
+  //   */
+  //  public static String getJdkVersion() {
+  //    return stringValue(UO__JDK_VERSION);
+  //  }
+
   /**
-   * Find the legacy exception handling option value.
+   * Find the keep line column option value (java / tpl, csharp / tpl, cpp / tpl).
+   *
+   * @return The keep line column option value
+   */
+  public static boolean getKeepLineColumn() {
+    return booleanValue(UO__KEEP_LINE_COLUMN);
+  }
+
+  /**
+   * Find the legacy exception handling option value (java / gen + tpl).
    *
    * <p>Since 6.1 JavaCC throws subclasses of {@link RuntimeException} rather than {@link Error} (by
    * default), as {@link Error} typically lead to the closing down of the parent VM and are only to
@@ -890,7 +923,7 @@ public class Options {
   }
 
   /**
-   * Find the library option value.
+   * Find the library option value (cpp / gen / tpl).
    *
    * @return The library option value
    */
@@ -899,7 +932,7 @@ public class Options {
   }
 
   /**
-   * Find the global lookahead option value.
+   * Find the global lookahead option value (core).
    *
    * @return The global lookahead option value
    */
@@ -908,7 +941,7 @@ public class Options {
   }
 
   /**
-   * Find the namespace option value.
+   * Find the namespace option value (csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The namespace option value
    */
@@ -917,16 +950,7 @@ public class Options {
   }
 
   /**
-   * Find the has namespace option value.
-   *
-   * @return The has namespace option value
-   */
-  public static boolean hasNamespace() {
-    return booleanValue(NUO__HAS_NAMESPACE);
-  }
-
-  /**
-   * Find the no dfa option value.
+   * Find the no dfa option value (core, java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The no dfa option value
    */
@@ -934,23 +958,8 @@ public class Options {
     return booleanValue(UO__NO_DFA);
   }
 
-  public static Pair<String, String> getOpenCloseNamespace(final String namespace) {
-    Pair<String, String> pair = null;
-    if (namespace.length() > 0) {
-      final StringTokenizer st = new StringTokenizer(namespace, "::");
-      String opening = st.nextToken() + " {";
-      String closing = "}";
-      while (st.hasMoreTokens()) {
-        opening = opening + "\nnamespace " + st.nextToken() + " {";
-        closing = closing + "\n}";
-      }
-      pair = new Pair<String, String>(opening, closing);
-    }
-    return pair;
-  }
-
   /**
-   * Find the other ambiguity check option value.
+   * Find the other ambiguity check option value (core).
    *
    * @return The other ambiguity check option value
    */
@@ -959,7 +968,7 @@ public class Options {
   }
 
   /**
-   * Find the output directory option value.
+   * Find the output directory option value (core, java / gen, csharp / gen, cpp / gen).
    *
    * @return The output directory option value
    */
@@ -968,7 +977,7 @@ public class Options {
   }
 
   /**
-   * Find the parser include option value.
+   * Find the parser include option value (cpp / gen).
    *
    * @return The parser include option value
    */
@@ -977,7 +986,7 @@ public class Options {
   }
 
   /**
-   * Find the sanity check option value.
+   * Find the sanity check option value (core).
    *
    * @return The sanity check option value
    */
@@ -986,7 +995,10 @@ public class Options {
   }
 
   /**
-   * Find the stack limit option value.
+   * Find the stack limit option value (cpp / gen).<br>
+   * If empty (the default value) or "0", no stack limit checking code will be generated, otherwise
+   * it will be assigned to a size_t var (so may be on some platforms it could be a long like 128L,
+   * therefore the String type).
    *
    * @return The stack limit option value, as a string (empty string if limit is 0)
    */
@@ -996,16 +1008,7 @@ public class Options {
   }
 
   /**
-   * Find the stop on first error option value.
-   *
-   * @return The stop on first error option value, as a string (empty string if limit is 0)
-   */
-  public static boolean getStopOnFirstError() {
-    return booleanValue(UO__STOP_ON_FIRST_ERROR);
-  }
-
-  /**
-   * Find the static option value.
+   * Find the static option value (java / gen + tpl, csharp / gen, cpp / gen).
    *
    * @return The static option value
    */
@@ -1014,7 +1017,17 @@ public class Options {
   }
 
   /**
-   * Find the support class visibility public option value.
+   * Find the stop on first error option value (cpp / gen).
+   *
+   * @return The stop on first error option value, as a string (empty string if limit is 0)
+   */
+  public static boolean getStopOnFirstError() {
+    return booleanValue(UO__STOP_ON_FIRST_ERROR);
+  }
+
+  /**
+   * Find the support class visibility public option value (java / gen + tpl, csharp / tpl, cpp /
+   * gen).
    *
    * @return The support class visibility public option value
    */
@@ -1023,7 +1036,16 @@ public class Options {
   }
 
   /**
-   * Find the token class option value.
+   * Find the Cpp throws exceptions option value (cpp / gen + Tpl).
+   *
+   * @return The Cpp throws exceptions option value
+   */
+  public static String getCppThrowsExceptions() {
+    return stringValue(UO__CPP_THROWS_EXCEPTIONS);
+  }
+
+  /**
+   * Find the token class option value (cpp / gen).
    *
    * @return The token class option value
    */
@@ -1032,7 +1054,7 @@ public class Options {
   }
 
   /**
-   * Find the token constants include option value.
+   * Find the token constants include option value (cpp / gen).
    *
    * @return The token constants include option value
    */
@@ -1041,7 +1063,7 @@ public class Options {
   }
 
   /**
-   * Find the token constants namespace option value.
+   * Find the token constants namespace option value (cpp / gen).
    *
    * @return The token constants namespace option value
    */
@@ -1050,7 +1072,7 @@ public class Options {
   }
 
   /**
-   * Find the Token superclass option value.
+   * Find the Token superclass option value (java / tpl, csharp / tpl).
    *
    * @return The Token superclass option value
    */
@@ -1059,7 +1081,7 @@ public class Options {
   }
 
   /**
-   * Find the Token factory class option value.
+   * Find the Token factory class option value (java / tpl, csharp / tpl, cpp / tpl).
    *
    * @return The Token factory class option value
    */
@@ -1068,7 +1090,7 @@ public class Options {
   }
 
   /**
-   * Find the token include option value.
+   * Find the token include option value (cpp / gen).
    *
    * @return The token include option value
    */
@@ -1077,7 +1099,7 @@ public class Options {
   }
 
   /**
-   * Find the token manager include option value.
+   * Find the token manager include option value (cpp / gen).
    *
    * @return The token manager include option value
    */
@@ -1086,7 +1108,17 @@ public class Options {
   }
 
   /**
-   * Find the token manager uses parser option value.
+   * Find the token manager super class option value (java / gen + cpp, csharp / gen + cpp).
+   *
+   * @return The token manager include option value
+   */
+  public static String getTokenManagerSuperClass() {
+    return stringValue(UO__TOKEN_MANAGER_SUPER_CLASS);
+  }
+
+  /**
+   * Find the token manager uses parser option value (java / gen + tpl, csharp / tpl, cpp / gen +
+   * tpl).
    *
    * @return The token manager uses parser option value;
    */
@@ -1095,7 +1127,7 @@ public class Options {
   }
 
   /**
-   * Find the token namespace option value.
+   * Find the token namespace option value (cpp / gen).
    *
    * @return The token namespace option value
    */
@@ -1104,7 +1136,7 @@ public class Options {
   }
 
   /**
-   * Find the unicode input option value.
+   * Find the unicode input option value (core).
    *
    * @return The unicode input option value
    */
@@ -1113,7 +1145,8 @@ public class Options {
   }
 
   /**
-   * Find the user token manager option value.
+   * Find the user token manager option value. (core, java / gen + tpl, csharp / tpl, cpp / gen +
+   * tpl)
    *
    * @return The user token manager value
    */
@@ -1122,7 +1155,7 @@ public class Options {
   }
 
   /**
-   * Find the user char stream option value.
+   * Find the user char stream option value (core, java / gen + tpl).
    *
    * @return The user char stream option value
    */
@@ -1130,16 +1163,25 @@ public class Options {
     return booleanValue(UO__USER_CHAR_STREAM);
   }
 
+  //  /**
+  //   * Determine if the output language is at least the specified version.
+  //   *
+  //   * @param version - the version to check against. E.g. <code>1.5</code>
+  //   * @return true if the output version is at least the specified version, false otherwise
+  //   */
+  //  private static boolean jdkVersionAtLeast(final double version) {
+  //    final double jdkVersion = Double.parseDouble(getJdkVersion());
+  //    // Comparing doubles is safe here, as it is two simple assignments.
+  //    return jdkVersion >= version;
+  //  }
+
   /**
-   * Determine if the output language is at least the specified version.
+   * Find the has namespace option value (csharp / gen, cpp / gen).
    *
-   * @param version - the version to check against. E.g. <code>1.5</code>
-   * @return true if the output version is at least the specified version, false otherwise
+   * @return The has namespace option value
    */
-  private static boolean jdkVersionAtLeast(final double version) {
-    final double jdkVersion = Double.parseDouble(getJdkVersion());
-    // Comparing doubles is safe here, as it is two simple assignments.
-    return jdkVersion >= version;
+  public static boolean hasNamespace() {
+    return booleanValue(NUO__HAS_NAMESPACE);
   }
 
   private static final Set<String> supportedJavaTemplateTypes = new HashSet<>();
@@ -1167,12 +1209,20 @@ public class Options {
     }
   }
 
-  private static void processNamespaceOption(final String optionValue) {
-    final Pair<String, String> pair = getOpenCloseNamespace(optionValue);
-    if (pair != null) {
+  static final String EOL = System.getProperty("line.separator");
+
+  private static void processNamespaceOption(final String namespaceValue) {
+    if (namespaceValue.length() > 0) {
+      final StringTokenizer st = new StringTokenizer(namespaceValue, "::");
+      String opening = st.nextToken() + " {";
+      String closing = "}";
+      while (st.hasMoreTokens()) {
+        opening = opening + EOL + "namespace " + st.nextToken() + " {";
+        closing = closing + EOL + "}";
+      }
       resOptions.put(NUO__HAS_NAMESPACE, Boolean.TRUE);
-      resOptions.put(NUO__NAMESPACE_OPEN, pair.getFirst());
-      resOptions.put(NUO__NAMESPACE_CLOSE, pair.getSecond());
+      resOptions.put(NUO__NAMESPACE_OPEN, opening);
+      resOptions.put(NUO__NAMESPACE_CLOSE, closing);
     }
   }
 
@@ -1185,7 +1235,7 @@ public class Options {
    *
    * @return the set of user options
    */
-  static Set<OptionInfo> getUserOptions() {
+  public static Set<OptionInfo> getUserOptions() {
     return legalOptions;
   }
 
