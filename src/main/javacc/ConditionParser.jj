@@ -1,4 +1,7 @@
-/* Copyright (c) 2009, Paul Cager.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * Copyright (c) 2009, Paul Cager.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,26 +12,25 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-/*
- * This file contains a simple parser to evalulate simple boolean conditions,
- * such as
- *   !value1 || value2
- */
-
-options {
+options
+{
+//  CODE_GENERATOR = "java";
   JAVA_UNICODE_ESCAPE = true;
   STATIC=false;
 }
@@ -40,11 +42,14 @@ package org.javacc.utils;
 import java.io.StringReader;
 import java.util.Map;
 
+/**
+ * Simple parser to evaluate simple boolean conditions, such as <code>!value1 || value2</code>.
+ */
 public class ConditionParser
 {
     private Map<String, Object> options;
     
-    public static void main(String... args) throws ParseException
+    public static void main(final String[] args) throws ParseException
     {
       test("F", false);
       test("T", true);
@@ -56,7 +61,7 @@ public class ConditionParser
       test("unknown", false);
     }
     
-    private static void test(String input, boolean expectedValue)  throws ParseException
+    private static void test(final String input, final boolean expectedValue) throws ParseException
     {
       ConditionParser cp = new ConditionParser(new StringReader(input));
       Map<String,Object> values = new java.util.HashMap<String,Object>();
@@ -70,8 +75,6 @@ public class ConditionParser
 }
 
 PARSER_END(ConditionParser)
-
-
 
 /* WHITE SPACE */
 
@@ -135,110 +138,99 @@ TOKEN :
 | < SC_AND: "&&" >
 }
 
-boolean CompilationUnit(Map<String,Object> options):
+boolean CompilationUnit(final Map<String,Object> options):
 {
-	boolean value;
-    this.options = options;
+  boolean value;
+  this.options = options;
 }
 {
   value = ConditionalExpression()
-  
   { return value; }
 }
 
 boolean ConditionalExpression():
-{
-	boolean value;
-}
+{ boolean value; }
 {
   value = ConditionalAndExpression() 
-  	{ if (value) return true; }
-  	
-  ( "||" 
-  	value = ConditionalAndExpression()
-  	    { if (value) return true; }
+  { if (value) return true; }
+  (
+    "||" 
+    value = ConditionalAndExpression()
+    { if (value) return true; }
   )*
-  
   { return false; }
 }
 
 boolean ConditionalAndExpression():
-{
-	boolean value;
-}
+{ boolean value; }
 {
   value = UnaryExpressionNotPlusMinus()
-  	{ if (!value) return false; }
-  
-  ( "&&"
+  { if (!value) return false; }
+  (
+    "&&"
     value = UnaryExpressionNotPlusMinus()
-  	    { if (!value) return false; }
+    { if (!value) return false; }
   )*
-  
   { return true; }
 }
 
-
 boolean UnaryExpressionNotPlusMinus():
+{ boolean value; }
 {
-	boolean value;
-}
-{
-  ( "~" | "!" ) value = UnaryExpressionNotPlusMinus() { return !value; }
-  | value = UnaryExpression()    { return value; }
+  ( "~" | "!" )
+  value = UnaryExpressionNotPlusMinus()
+  { return !value; }
+|
+  value = UnaryExpression()
+  { return value; }
 }
 
 boolean UnaryExpression():
+{ boolean value; }
 {
-	boolean value;
-}
-{
-  value = Literal()		{ return value; }
+  value = Literal()
+  { return value; }
 |
-  "(" value = ConditionalExpression() ")" { return value; }
+  "(" value = ConditionalExpression() ")"
+  { return value; }
 |
-  value = Name()  { return value; } 
+  value = Name()
+  { return value; } 
 }
 
 boolean Literal():
+{ boolean value; }
 {
-	boolean value;
-}
-{
-  value = BooleanLiteral()     { return value; }
+  value = BooleanLiteral()
+  { return value; }
 }
 
 boolean BooleanLiteral() :
 {}
 {
-   <TRUE>    { return true; }
- | <FALSE>   { return false; }
+  <TRUE>  { return true; }
+| <FALSE> { return false; }
 }
 
 boolean Name() :
+{ String name; }
 {
-  String name;
-}
-{
-	<IDENTIFIER>
-	
-	{
-	    name = getToken(0).image.trim();
-	    
-	    Object obj = options.get(name);
-	    
-	    if (obj instanceof Boolean)
-	    {
-	      return ((Boolean)obj).booleanValue();
-	    }
-	    else if (obj instanceof String)
-	    {
-	      String string = ((String)obj).trim();
-	      return string.length() > 0 && !string.equalsIgnoreCase("false") && !string.equalsIgnoreCase("no");
-	    }
-	    
-	    return false;
-	}
+  <IDENTIFIER>
+  
+  {
+    name = getToken(0).image.trim();
+    Object obj = options.get(name);
+    if (obj instanceof Boolean)
+    {
+      return ((Boolean)obj).booleanValue();
+    }
+    else if (obj instanceof String)
+    {
+      String string = ((String)obj).trim();
+      return string.length() > 0 && !string.equalsIgnoreCase("false") && !string.equalsIgnoreCase("no");
+    }
+    return false;
+  }
 }
 
 /* IDENTIFIERS */
