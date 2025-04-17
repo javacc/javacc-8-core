@@ -1,19 +1,19 @@
-// Copyright 2011 Google Inc. All Rights Reserved.
-// Author: sreeni@google.com (Sreeni Viswanadha)
-
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2011-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -24,8 +24,8 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.javacc.jjtree;
 
@@ -101,7 +101,7 @@ public class JJTree {
   public int main(final String args[]) {
 
     // initialize static state for allowing repeat runs without exiting
-    //    ASTNodeDescriptor.nodeIds = new ArrayList<>();
+    ASTNodeDescriptor.nodeIds = new ArrayList<>();
     ASTNodeDescriptor.nodeNames = new ArrayList<>();
     ASTNodeDescriptor.nodeSeen = new Hashtable<>();
     org.javacc.parser.Main.reInitAll();
@@ -136,7 +136,7 @@ public class JJTree {
         Options.processCmdLineOption(args[arg]);
       }
 
-      context.validate();
+      //      context.validate();
 
       try {
         io.setInput(fn);
@@ -152,6 +152,8 @@ public class JJTree {
       try {
         final JJTreeParser parser = new JJTreeParser(io.getIn());
         parser.javacc_input(context);
+
+        context.validate();
 
         final ASTGrammar root = (ASTGrammar) parser.jjtree.rootNode();
         if (Boolean.getBoolean("jjtree-dump")) {
@@ -189,8 +191,9 @@ public class JJTree {
     // into a single Enum class
     final CodeGenerator cg = context.getCodeGenerator();
     if (cg != null) {
-      cg.getJJTreeCodeGenerator(context).visit(grammar, io);
-      cg.getJJTreeCodeGenerator(context).generateHelperFiles();
+      final DefaultJJTreeVisitor vis = cg.getJJTreeCodeGenerator(context);
+      vis.visit(grammar, io);
+      vis.generateHelperFiles();
     } else {
       // Catch all to ensure we don't accidently do nothing
       throw new RuntimeException(
@@ -198,5 +201,3 @@ public class JJTree {
     }
   }
 }
-
-/* end */

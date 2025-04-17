@@ -39,37 +39,36 @@ public class ASTNodeDescriptor extends JJTreeNode {
 
   private boolean faked = false;
 
-  ASTNodeDescriptor(int id) {
+  ASTNodeDescriptor(final int id) {
     super(id);
   }
 
-  static ASTNodeDescriptor indefinite(String s) {
-    ASTNodeDescriptor nd = new ASTNodeDescriptor(JJTreeParserTreeConstants.JJTNODEDESCRIPTOR);
+  static ASTNodeDescriptor indefinite(final String s) {
+    final ASTNodeDescriptor nd = new ASTNodeDescriptor(JJTreeParserTreeConstants.JJTNODEDESCRIPTOR);
     nd.name = s;
     nd.setNodeIdValue();
     nd.faked = true;
     return nd;
   }
 
-
-  static List<String>              nodeIds   = new ArrayList<>();
-  static List<String>              nodeNames = new ArrayList<>();
-  static Hashtable<String, String> nodeSeen  = new Hashtable<>();
+  static List<String> nodeIds = new ArrayList<>();
+  static List<String> nodeNames = new ArrayList<>();
+  static Hashtable<String, String> nodeSeen = new Hashtable<>();
 
   public static List<String> getNodeIds() {
-    return ASTNodeDescriptor.nodeIds;
+    return nodeIds;
   }
 
   public static List<String> getNodeNames() {
-    return ASTNodeDescriptor.nodeNames;
+    return nodeNames;
   }
 
   void setNodeIdValue() {
-    String k = getNodeId();
-    if (!ASTNodeDescriptor.nodeSeen.containsKey(k)) {
-      ASTNodeDescriptor.nodeSeen.put(k, k);
-      ASTNodeDescriptor.nodeNames.add(name);
-      ASTNodeDescriptor.nodeIds.add(k);
+    final String k = getNodeId();
+    if (!nodeSeen.containsKey(k)) {
+      nodeSeen.put(k, k);
+      nodeNames.add(name);
+      nodeIds.add(k);
     }
   }
 
@@ -77,11 +76,9 @@ public class ASTNodeDescriptor extends JJTreeNode {
     return "JJT" + name.toUpperCase().replace('.', '_');
   }
 
-
-  String                      name;
-  boolean                     isGT;
+  String name;
+  boolean isGT;
   ASTNodeDescriptorExpression expression;
-
 
   public boolean isVoid() {
     return name.equals("void");
@@ -96,7 +93,6 @@ public class ASTNodeDescriptor extends JJTreeNode {
     }
   }
 
-
   public String getDescriptor() {
     if (expression == null) {
       return name;
@@ -105,7 +101,7 @@ public class ASTNodeDescriptor extends JJTreeNode {
     }
   }
 
-  public String getNodeType(JJTreeContext context) {
+  public String getNodeType(final JJTreeContext context) {
     if (context.treeOptions().getMulti()) {
       return context.treeOptions().getNodePrefix() + name;
     } else {
@@ -113,19 +109,17 @@ public class ASTNodeDescriptor extends JJTreeNode {
     }
   }
 
-
   public String getNodeName() {
     return name;
   }
 
-
-  public String openNode(String nodeVar) {
+  public String openNode(final String nodeVar) {
     return "jjtree.openNodeScope(" + nodeVar + ");";
   }
 
-
   private String expression_text() {
-    if (expression.getFirstToken().image.equals(")") && expression.getLastToken().image.equals("(")) {
+    if (expression.getFirstToken().image.equals(")")
+        && expression.getLastToken().image.equals("(")) {
       return "true";
     }
 
@@ -141,26 +135,28 @@ public class ASTNodeDescriptor extends JJTreeNode {
     return s;
   }
 
-
-  public String closeNode(String nodeVar) {
+  public String closeNode(final String nodeVar) {
     if (expression == null) {
       return "jjtree.closeNodeScope(" + nodeVar + ", true);";
     } else if (isGT) {
-      return "jjtree.closeNodeScope(" + nodeVar + ", jjtree.nodeArity() >" + expression_text() + ");";
+      return "jjtree.closeNodeScope("
+          + nodeVar
+          + ", jjtree.nodeArity() >"
+          + expression_text()
+          + ");";
     } else {
       return "jjtree.closeNodeScope(" + nodeVar + ", " + expression_text() + ");";
     }
   }
 
-
   @Override
-  public String translateImage(Token t) {
+  public String translateImage(final Token t) {
     return whiteOut(t);
   }
 
-  /** Accept the visitor. **/
+  /** Accept the visitor. * */
   @Override
-  public Object jjtAccept(JJTreeParserVisitor visitor, Object data) {
+  public Object jjtAccept(final JJTreeParserVisitor visitor, final Object data) {
     return visitor.visit(this, data);
   }
 }

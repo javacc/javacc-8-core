@@ -192,6 +192,6 @@ public final class OptionsTest extends TestCase {
     Options.processCmdLineOption("-IGNORE_CASE=True");
     final String[] options = {Options.UO__STATIC, Options.UO__IGNORE_CASE};
     final String optionString = Options.fmtOptionsArray(options);
-    assertEquals("STATIC=false,IGNORE_CASE=true", optionString);
+    assertEquals("STATIC=false, IGNORE_CASE=true", optionString);
   }
 }

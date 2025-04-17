@@ -114,9 +114,9 @@ public abstract class CodeBuilder<B extends CodeBuilder<?>> implements Closeable
   }
 
   /**
-   * Add a tool.
+   * Add an option.
    *
-   * @param tool
+   * @param option
    */
   @SuppressWarnings("unchecked")
   public final B addOption(final String... options) {

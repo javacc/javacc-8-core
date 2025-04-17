@@ -420,14 +420,23 @@ public class Options {
    * @return the string representation of the options, eg "STATIC=true, CACHE_TOKENS=false"
    */
   public static String fmtOptionsArray(final String[] options) {
-    final StringBuilder sb = new StringBuilder(32);
+    final StringBuilder sb = new StringBuilder(128);
+    int len = 18; // "/* JavaCCOptions: ".length()
     for (final String opt : options) {
+      if (len > 90) {
+        sb.append(EOL).append("                  ");
+        len = 18;
+      }
       sb.append(opt);
       sb.append('=');
-      sb.append(resOptions.get(opt));
-      sb.append(",");
+      len += 1 + opt.length();
+      final Object obj = resOptions.get(opt);
+      final String val = obj == null ? "null" : obj.toString();
+      sb.append(val);
+      sb.append(", ");
+      len += 2 + val.length();
     }
-    sb.setLength(sb.length() - 1);
+    sb.setLength(sb.length() - 2);
     return sb.toString();
   }
 

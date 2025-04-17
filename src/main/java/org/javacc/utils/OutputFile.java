@@ -126,7 +126,7 @@ class OutputFile implements Closeable {
                 + " */");
         if (!options.isEmpty()) {
           writer.println(
-              "/* JavaCCOptions:"
+              "/* JavaCCOptions: "
                   + Options.fmtOptionsArray(options.toArray(new String[options.size()]))
                   + " */");
         }

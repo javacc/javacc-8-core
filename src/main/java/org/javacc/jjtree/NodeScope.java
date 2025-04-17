@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,24 +24,23 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjtree;
 
 public class NodeScope {
 
-  public ASTProduction     production;
+  public ASTProduction production;
   public ASTNodeDescriptor node_descriptor;
 
-  public String            closedVar;
-  public String            exceptionVar;
-  public String            nodeVar;
+  public String closedVar;
+  public String exceptionVar;
+  public String nodeVar;
 
-  private final int        scopeNumber;
+  private final int scopeNumber;
 
-  public NodeScope(ASTProduction p, ASTNodeDescriptor n, JJTreeContext context) {
+  public NodeScope(final ASTProduction p, final ASTNodeDescriptor n, final JJTreeContext context) {
     production = p;
 
     if (n == null) {
@@ -58,38 +59,32 @@ public class NodeScope {
     exceptionVar = constructVariable("e");
   }
 
-
   public boolean isVoid() {
     return node_descriptor.isVoid();
   }
-
 
   public ASTNodeDescriptor getNodeDescriptor() {
     return node_descriptor;
   }
 
-
   public String getNodeDescriptorText() {
     return node_descriptor.getDescriptor();
   }
-
 
   public String getNodeVariable() {
     return nodeVar;
   }
 
-
-  private String constructVariable(String id) {
-    String s = "000" + scopeNumber;
+  private String constructVariable(final String id) {
+    final String s = "000" + scopeNumber;
     return "jjt" + id + s.substring(s.length() - 3, s.length());
   }
-
 
   public boolean usesCloseNodeVar() {
     return true;
   }
 
-  public static NodeScope getEnclosingNodeScope(Node node) {
+  public static NodeScope getEnclosingNodeScope(final Node node) {
     if (node instanceof ASTBNFDeclaration) {
       return ((ASTBNFDeclaration) node).node_scope;
     }
@@ -104,7 +99,6 @@ public class NodeScope {
     }
     return null;
   }
-
 }
 
 /* end */

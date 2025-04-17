@@ -57,12 +57,12 @@ public class JJTreeParser
 
   void jjtreeOpenNodeScope(final Node n)
   {
-    ((JJTreeNode)n).setFirstToken(getToken(1));
+    ((JJTreeNode) n).setFirstToken(getToken(1));
   }
 
   void jjtreeCloseNodeScope(final Node n)
   {
-    ((JJTreeNode)n).setLastToken(getToken(0));
+    ((JJTreeNode) n).setLastToken(getToken(0));
   }
 
   /**
@@ -359,14 +359,14 @@ TOKEN :
   < RUNSIGNEDSHIFT : ">>>" >
   {
      matchedToken.kind = GT;
-     ((Token.GTToken)matchedToken).realKind = RUNSIGNEDSHIFT;
+     ((Token.GTToken) matchedToken).realKind = RUNSIGNEDSHIFT;
      input_stream.backup(2);
      matchedToken.image = ">";
   }
 | < RSIGNEDSHIFT : ">>" >
   {
      matchedToken.kind = GT;
-     ((Token.GTToken)matchedToken).realKind = RSIGNEDSHIFT;
+     ((Token.GTToken) matchedToken).realKind = RSIGNEDSHIFT;
      input_stream.backup(1);
      matchedToken.image = ">";
   }
@@ -438,7 +438,7 @@ void option_binding() #OptionBinding :
   | v = StringLiteral()
     {
       String vs = TokenUtils.remove_escapes_and_quotes(v, v.image, context);
-      JJTreeOptions.processGrammarFileOption(o, v, o.image, (Object)vs, context);
+      JJTreeOptions.processGrammarFileOption(o, v, o.image, (Object) vs, context);
       jjtThis.initialize(o.image, vs);
     }
   ) ";"
@@ -614,7 +614,7 @@ JJTreeNode expansion_choices(ASTProduction p) #BNFChoice(>1) :
 {}
 {
   expansion(p) ( "|" expansion(p) )*
-  { return (JJTreeNode)jjtree.peekNode(); }
+  { return (JJTreeNode) jjtree.peekNode(); }
 }
 
 void expansion(ASTProduction p) #BNFSequence(>1) :
@@ -721,9 +721,9 @@ JJTreeNode expansion_unit(ASTProduction p) :
     |
       {} #BNFParenthesized(1)
     )
-    { ((JJTreeNode)jjtree.peekNode()).setFirstToken(t); }
+    { ((JJTreeNode) jjtree.peekNode()).setFirstToken(t); }
   )
-  { return (JJTreeNode)jjtree.peekNode(); }
+  { return (JJTreeNode) jjtree.peekNode(); }
 }
 
 void regular_expression() :
@@ -779,7 +779,7 @@ void complex_regular_expression_unit() :
   |
     {} #REParenthesized(1)
   )
-  { ((JJTreeNode)jjtree.peekNode()).setFirstToken(t); }
+  { ((JJTreeNode) jjtree.peekNode()).setFirstToken(t); }
 }
 
 void character_list() #RECharList :
@@ -828,8 +828,8 @@ ASTNodeDescriptor node_descriptor() #NodeDescriptor :
       { jjtThis.isGT = true; }
     ]
     node_descriptor_expression()
-    { jjtThis.expression = (ASTNodeDescriptorExpression)jjtree.peekNode(); }
-   ")"
+    { jjtThis.expression = (ASTNodeDescriptorExpression) jjtree.peekNode(); }
+    ")"
   ]
   {
     jjtThis.setNodeIdValue();
@@ -1912,7 +1912,7 @@ void RUNSIGNEDSHIFT() :
 {}
 {
   ( LOOKAHEAD({ getToken(1).kind == GT &&
-                ((Token.GTToken)getToken(1)).realKind == RUNSIGNEDSHIFT} )
+                ((Token.GTToken) getToken(1)).realKind == RUNSIGNEDSHIFT} )
    ">" ">" ">"
   )
 }
@@ -1921,7 +1921,7 @@ void RSIGNEDSHIFT() :
 {}
 {
   ( LOOKAHEAD({ getToken(1).kind == GT &&
-                ((Token.GTToken)getToken(1)).realKind == RSIGNEDSHIFT} )
+                ((Token.GTToken) getToken(1)).realKind == RSIGNEDSHIFT} )
   ">" ">"
   )
 }

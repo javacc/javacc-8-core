@@ -190,8 +190,8 @@ abstract class OutputFileDigest {
   }
 
   /**
-   * Read the options line from the file and compare to the options currently in use. Output a
-   * warning if they are different.
+   * Read the options line from the file and compare to the options currently in use.<br>
+   * Output a warning if they are different.
    *
    * @param file
    * @param options
@@ -200,7 +200,11 @@ abstract class OutputFileDigest {
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       String line;
       while ((line = reader.readLine()) != null) {
-        if (line.startsWith("/* JavaCCOptions:")) {
+        if (line.startsWith("/* JavaCCOptions: ")) {
+          while (!line.endsWith(" */")) {
+            line += EOL;
+            line += reader.readLine();
+          }
           final String currentOptions = Options.fmtOptionsArray(options);
           if (line.indexOf(currentOptions) == -1) {
             context
@@ -221,6 +225,8 @@ abstract class OutputFileDigest {
     }
     // Not found so cannot check
   }
+
+  static final String EOL = System.getProperty("line.separator");
 
   private static String toHexString(final DigestOutputStream digestStream) {
     final StringBuffer buffer = new StringBuffer(32);
