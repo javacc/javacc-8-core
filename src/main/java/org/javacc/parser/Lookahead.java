@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,10 +24,9 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
@@ -33,46 +34,40 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Describes lookahead rule for a particular expansion or expansion sequence
- * (See Sequence.java). In case this describes the lookahead rule for a single
- * expansion unit, then a sequence is created with this node as the first
- * element, and the expansion unit as the second and last element.
+ * Describes lookahead rule for a particular expansion or expansion sequence (See Sequence.java).
+ * <br>
+ * In case this describes the lookahead rule for a single expansion unit, then a sequence is created
+ * with this node as the first element, and the expansion unit as the second and last element.
  */
-
 public class Lookahead extends Expansion {
 
   /**
-   * Contains the list of tokens that make up the semantic lookahead if any. If
-   * this node represents a different kind of lookahead (other than semantic
-   * lookahead), then this list contains nothing. If this list contains
-   * something, then it is the boolean expression that forms the semantic
-   * lookahead. In this case, the following fields "amount" and "la_expansion"
-   * are ignored.
+   * Contains the list of tokens that make up the semantic lookahead if any.<br>
+   * If this node represents a different kind of lookahead (other than semantic lookahead), then
+   * this list contains nothing. If this list contains something, then it is the boolean expression
+   * that forms the semantic lookahead. <br>
+   * In this case, the following fields "amount" and "la_expansion" are ignored.
    */
   private final List<Token> action_tokens = new ArrayList<>();
 
-  /**
-   * The lookahead amount. Its default value essentially gives us infinite
-   * lookahead.
-   */
-  private int               amount        = Integer.MAX_VALUE;
+  /** The lookahead amount. Its default value essentially gives us infinite lookahead. */
+  private int amount = Integer.MAX_VALUE;
 
   /**
-   * The expansion used to determine whether or not to choose the corresponding
-   * parse option. This expansion is parsed upto "amount" tokens of lookahead or
-   * until a complete match for it is found. Usually, this is the same as the
-   * expansion to be parsed.
+   * The expansion used to determine whether or not to choose the corresponding parse option.<br>
+   * This expansion is parsed upto "amount" tokens of lookahead or until a complete match for it is
+   * found.<br>
+   * Usually, this is the same as the expansion to be parsed.
    */
-  private Expansion         la_expansion;
+  private Expansion la_expansion;
 
-  /**
-   * Is set to true if this is an explicit lookahead specification.
-   */
-  private boolean           isExplicit;
+  /** Is set to true if this is an explicit lookahead specification. */
+  private boolean isExplicit;
 
   @Override
-  public StringBuffer dump(int indent, Set<Expansion> alreadyDumped) {
-    StringBuffer sb = super.dump(indent, alreadyDumped).append(isExplicit ? " explicit" : " implicit");
+  public StringBuffer dump(final int indent, final Set<Expansion> alreadyDumped) {
+    final StringBuffer sb =
+        super.dump(indent, alreadyDumped).append(isExplicit ? " explicit" : " implicit");
     if (alreadyDumped.contains(this)) {
       return sb;
     }
@@ -91,7 +86,7 @@ public class Lookahead extends Expansion {
   /**
    * @param amount the amount to set
    */
-  public void setAmount(int amount) {
+  public void setAmount(final int amount) {
     this.amount = amount;
   }
 
@@ -105,7 +100,7 @@ public class Lookahead extends Expansion {
   /**
    * @param la_expansion the la_expansion to set
    */
-  public void setLaExpansion(Expansion la_expansion) {
+  public void setLaExpansion(final Expansion la_expansion) {
     this.la_expansion = la_expansion;
   }
 
@@ -119,7 +114,7 @@ public class Lookahead extends Expansion {
   /**
    * @param isExplicit the isExplicit to set
    */
-  public void setExplicit(boolean isExplicit) {
+  public void setExplicit(final boolean isExplicit) {
     this.isExplicit = isExplicit;
   }
 

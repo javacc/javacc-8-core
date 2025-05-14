@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -24,26 +27,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjtree;
 
 public class ASTBNFNodeScope extends JJTreeNode {
 
-  ASTBNFNodeScope(int id) {
+  ASTBNFNodeScope(final int id) {
     super(id);
   }
 
-  public NodeScope  node_scope;
+  public NodeScope node_scope;
   public JJTreeNode expansion_unit;
 
-
-  /** Accept the visitor. **/
+  /** Accept the visitor. */
   @Override
-  public Object jjtAccept(JJTreeParserVisitor visitor, Object data) {
+  public Object jjtAccept(final JJTreeParserVisitor visitor, final Object data) {
     return visitor.visit(this, data);
   }
 }
-/*
- * JavaCC - OriginalChecksum=f49d04b7468139b25c2e1cba48d4183b (do not edit this
- * line)
- */

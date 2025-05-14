@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,40 +24,30 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
-/**
- * The object type of entries in the vector "respecs" of class
- * "TokenProduction".
- */
-
+/** The object type of entries in the vector "respecs" of class "TokenProduction". */
 public class RegExprSpec {
 
-  /**
-   * The regular expression of this specification.
-   */
+  /** The regular expression of this specification. */
   public RegularExpression rexp;
 
-  /**
-   * The action corresponding to this specification.
-   */
-  Action                   act;
+  /** The action corresponding to this specification. */
+  Action act;
 
   /**
-   * The next state corresponding to this specification. If no next state has
-   * been specified, this field is set to "null".
+   * The next state corresponding to this specification.<br>
+   * If no next state has been specified, this field is set to "null".
    */
-  String                   nextState;
+  String nextState;
 
   /**
-   * If the next state specification was explicit in the previous case, then
-   * this token is that of the identifier denoting the next state. This is used
-   * for location information, etc. in error reporting.
+   * If the next state specification was explicit in the previous case, then this token is that of
+   * the identifier denoting the next state. <br>
+   * This is used for location information, etc. in error reporting.
    */
-  public Token             nsTok;
-
+  public Token nsTok;
 }

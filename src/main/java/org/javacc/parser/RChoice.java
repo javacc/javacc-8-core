@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,32 +24,27 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Describes regular expressions which are choices from from among included
- * regular expressions.
- */
-
+/** Describes regular expressions which are choices from from among included regular expressions. */
 public class RChoice extends RegularExpression {
 
   /**
-   * The list of choices of this regular expression. Each list component will
-   * narrow to RegularExpression.
+   * The list of choices of this regular expression. <br>
+   * Each list component will narrow to RegularExpression.
    */
   private List<RegularExpression> choices = new ArrayList<>();
 
   /**
    * @param choices the choices to set
    */
-  public void setChoices(List<RegularExpression> choices) {
+  public void setChoices(final List<RegularExpression> choices) {
     this.choices = choices;
   }
 
@@ -58,20 +56,20 @@ public class RChoice extends RegularExpression {
   }
 
   @Override
-  public Nfa GenerateNfa(boolean ignoreCase, LexerContext lexerContext) {
+  public Nfa GenerateNfa(final boolean ignoreCase, final LexerContext lexerContext) {
     CompressCharLists(lexerContext);
 
     if (getChoices().size() == 1) {
       return getChoices().get(0).GenerateNfa(ignoreCase, lexerContext);
     }
 
-    Nfa retVal = new Nfa(lexerContext);
-    NfaState startState = retVal.start;
-    NfaState finalState = retVal.end;
+    final Nfa retVal = new Nfa(lexerContext);
+    final NfaState startState = retVal.start;
+    final NfaState finalState = retVal.end;
 
     for (int i = 0; i < getChoices().size(); i++) {
       Nfa temp;
-      RegularExpression curRE = getChoices().get(i);
+      final RegularExpression curRE = getChoices().get(i);
 
       temp = curRE.GenerateNfa(ignoreCase, lexerContext);
 
@@ -82,7 +80,7 @@ public class RChoice extends RegularExpression {
     return retVal;
   }
 
-  private void CompressCharLists(LexerContext lexerContext) {
+  private void CompressCharLists(final LexerContext lexerContext) {
     CompressChoices(); // Unroll nested choices
     RegularExpression curRE;
     RCharacterList curCharList = null;
@@ -103,7 +101,7 @@ public class RChoice extends RegularExpression {
           ((RCharacterList) curRE).RemoveNegation(lexerContext);
         }
 
-        List<Expansion> tmp = ((RCharacterList) curRE).descriptors;
+        final List<Expansion> tmp = ((RCharacterList) curRE).descriptors;
 
         if (curCharList == null) {
           getChoices().set(i, curRE = curCharList = new RCharacterList());
@@ -111,11 +109,10 @@ public class RChoice extends RegularExpression {
           getChoices().remove(i--);
         }
 
-        for (int j = tmp.size(); j-- > 0;) {
+        for (int j = tmp.size(); j-- > 0; ) {
           curCharList.descriptors.add(tmp.get(j));
         }
       }
-
     }
   }
 
@@ -131,28 +128,42 @@ public class RChoice extends RegularExpression {
 
       if (curRE instanceof RChoice) {
         getChoices().remove(i--);
-        for (int j = ((RChoice) curRE).getChoices().size(); j-- > 0;) {
+        for (int j = ((RChoice) curRE).getChoices().size(); j-- > 0; ) {
           getChoices().add(((RChoice) curRE).getChoices().get(j));
         }
       }
     }
   }
 
-  void CheckUnmatchability(int[] lexStates, Context context) {
+  void CheckUnmatchability(final int[] lexStates, final Context context) {
     RegularExpression curRE;
     for (int i = 0; i < getChoices().size(); i++) {
-      if (!(curRE = getChoices().get(i)).private_rexp && (// curRE instanceof
+      if (!(curRE = getChoices().get(i)).private_rexp
+          && ( // curRE instanceof
           // RJustName &&
-          curRE.ordinal > 0) && (curRE.ordinal < ordinal) && (lexStates[curRE.ordinal] == lexStates[ordinal])) {
+          curRE.ordinal > 0)
+          && (curRE.ordinal < ordinal)
+          && (lexStates[curRE.ordinal] == lexStates[ordinal])) {
         if (label != null) {
-          context.errors().warning(this,
-              "Regular Expression choice : " + curRE.label + " can never be matched as : " + label);
+          context
+              .errors()
+              .warning(
+                  this,
+                  "Regular Expression choice : "
+                      + curRE.label
+                      + " can never be matched as : "
+                      + label);
         } else {
-          context.errors().warning(this,
-              "Regular Expression choice : " + curRE.label + " can never be matched as token of kind : " + ordinal);
+          context
+              .errors()
+              .warning(
+                  this,
+                  "Regular Expression choice : "
+                      + curRE.label
+                      + " can never be matched as token of kind : "
+                      + ordinal);
         }
       }
     }
   }
-
 }

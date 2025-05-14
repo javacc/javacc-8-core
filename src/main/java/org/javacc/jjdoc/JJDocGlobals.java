@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,45 +27,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjdoc;
 
-/**
- * Global variables for JJDoc.
- *
- */
+/** Global variables for JJDoc. */
 public class JJDocGlobals {
 
-  /**
-   * The name of the input file.
-   */
-  public static String    input_file;
-  /**
-   * The name of the output file.
-   */
-  public static String    output_file;
+  /** The name of the input file. */
+  public static String input_file;
 
-  /**
-   * The Generator to create output with.
-   */
+  /** The name of the output file. */
+  public static String output_file;
+
+  /** The Generator to create output with. */
   public static Generator generator;
 
   /**
-   * The commandline option is either TEXT or not, but the generator might have
-   * been set to some other Generator using the setGenerator method.
+   * The commandline option is either TEXT or not, but the generator might have been set to some
+   * other Generator using the setGenerator method.
    *
    * @return the generator configured in options or set by setter.
    */
-  public static Generator getGenerator(JJDocContext context) {
+  public static Generator getGenerator(final JJDocContext context) {
     if (JJDocGlobals.generator == null) {
       if (context.getText()) {
         JJDocGlobals.generator = new TextGenerator(context);
       } else if (context.getBNF()) {
         JJDocGlobals.generator = new BNFGenerator(context);
       } else if (context.getXText()) {
-          JJDocGlobals.generator = new XTextGenerator(context);
+        JJDocGlobals.generator = new XTextGenerator(context);
       } else if (context.getJCC()) {
-          JJDocGlobals.generator = new JCCGenerator(context);
+        JJDocGlobals.generator = new JCCGenerator(context);
       } else {
         JJDocGlobals.generator = new HTMLGenerator(context);
       }
@@ -75,9 +68,9 @@ public class JJDocGlobals {
       } else if (context.getBNF()) {
         JJDocGlobals.generator = new BNFGenerator(context);
       } else if (context.getXText()) {
-          JJDocGlobals.generator = new XTextGenerator(context);
+        JJDocGlobals.generator = new XTextGenerator(context);
       } else if (context.getJCC()) {
-          JJDocGlobals.generator = new JCCGenerator(context);
+        JJDocGlobals.generator = new JCCGenerator(context);
       } else {
         if (JJDocGlobals.generator instanceof TextGenerator) {
           JJDocGlobals.generator = new HTMLGenerator(context);
@@ -92,7 +85,7 @@ public class JJDocGlobals {
    *
    * @param message the message to log
    */
-  public static void info(JJDocContext context, String message) {
+  public static void info(final JJDocContext context, final String message) {
     JJDocGlobals.getGenerator(context).info(message);
   }
 
@@ -101,9 +94,7 @@ public class JJDocGlobals {
    *
    * @param message the message to log
    */
-  public static void error(JJDocContext context, String message) {
+  public static void error(final JJDocContext context, final String message) {
     JJDocGlobals.getGenerator(context).error(message);
   }
-
-
 }

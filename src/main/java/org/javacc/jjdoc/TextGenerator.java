@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,13 +24,12 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-
 package org.javacc.jjdoc;
 
+import java.io.PrintWriter;
 import org.javacc.parser.CppCodeProduction;
 import org.javacc.parser.Expansion;
 import org.javacc.parser.JavaCodeProduction;
@@ -37,18 +39,13 @@ import org.javacc.parser.NormalProduction;
 import org.javacc.parser.RegularExpression;
 import org.javacc.parser.TokenProduction;
 
-import java.io.PrintWriter;
-
-/**
- * Output BNF in text format.
- */
+/** Output BNF in text format. */
 public class TextGenerator implements Generator {
 
   protected final JJDocContext context;
-  protected PrintWriter        ostr;
+  protected PrintWriter ostr;
 
-
-  public TextGenerator(JJDocContext context) {
+  public TextGenerator(final JJDocContext context) {
     this.context = context;
   }
 
@@ -58,7 +55,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#text(java.lang.String)
    */
   @Override
-  public void text(String s) {
+  public void text(final String s) {
     print(s);
   }
 
@@ -68,7 +65,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#print(java.lang.String)
    */
   @Override
-  public void print(String s) {
+  public void print(final String s) {
     ostr.print(s);
   }
 
@@ -100,10 +97,9 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#specialTokens(java.lang.String)
    */
   @Override
-  public void specialTokens(String s) {
+  public void specialTokens(final String s) {
     ostr.print(s);
   }
-
 
   /**
    * {@inheritDoc}
@@ -134,11 +130,10 @@ public class TextGenerator implements Generator {
   }
 
   @Override
-  public void handleTokenProduction(TokenProduction tp) {
-    String text = JJDoc.getStandardTokenProductionText(tp, context);
+  public void handleTokenProduction(final TokenProduction tp) {
+    final String text = JJDoc.getStandardTokenProductionText(tp, context);
     text(text);
   }
-
 
   /**
    * {@inheritDoc}
@@ -154,7 +149,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#javacode(org.javacc.parser.JavaCodeProduction)
    */
   @Override
-  public void javacode(JavaCodeProduction jp) {
+  public void javacode(final JavaCodeProduction jp) {
     productionStart(jp);
     text("java code");
     productionEnd(jp);
@@ -166,7 +161,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#cppcode(org.javacc.parser.CppCodeProduction)
    */
   @Override
-  public void cppcode(CppCodeProduction cp) {
+  public void cppcode(final CppCodeProduction cp) {
     productionStart(cp);
     text("c++ code");
     productionEnd(cp);
@@ -178,7 +173,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#productionStart(org.javacc.parser.NormalProduction)
    */
   @Override
-  public void productionStart(NormalProduction np) {
+  public void productionStart(final NormalProduction np) {
     ostr.print("\t" + np.getLhs() + "\t:=\t");
   }
 
@@ -188,18 +183,17 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#productionEnd(org.javacc.parser.NormalProduction)
    */
   @Override
-  public void productionEnd(NormalProduction np) {
+  public void productionEnd(final NormalProduction np) {
     ostr.print("\n");
   }
 
   /**
    * {@inheritDoc}
    *
-   * @see org.javacc.jjdoc.Generator#expansionStart(org.javacc.parser.Expansion,
-   *      boolean)
+   * @see org.javacc.jjdoc.Generator#expansionStart(org.javacc.parser.Expansion, boolean)
    */
   @Override
-  public void expansionStart(Expansion e, boolean first) {
+  public void expansionStart(final Expansion e, final boolean first) {
     if (!first) {
       ostr.print("\n\t\t|\t");
     }
@@ -208,11 +202,10 @@ public class TextGenerator implements Generator {
   /**
    * {@inheritDoc}
    *
-   * @see org.javacc.jjdoc.Generator#expansionEnd(org.javacc.parser.Expansion,
-   *      boolean)
+   * @see org.javacc.jjdoc.Generator#expansionEnd(org.javacc.parser.Expansion, boolean)
    */
   @Override
-  public void expansionEnd(Expansion e, boolean first) {}
+  public void expansionEnd(final Expansion e, final boolean first) {}
 
   /**
    * {@inheritDoc}
@@ -220,7 +213,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#nonTerminalStart(org.javacc.parser.NonTerminal)
    */
   @Override
-  public void nonTerminalStart(NonTerminal nt) {}
+  public void nonTerminalStart(final NonTerminal nt) {}
 
   /**
    * {@inheritDoc}
@@ -228,7 +221,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#nonTerminalEnd(org.javacc.parser.NonTerminal)
    */
   @Override
-  public void nonTerminalEnd(NonTerminal nt) {}
+  public void nonTerminalEnd(final NonTerminal nt) {}
 
   /**
    * {@inheritDoc}
@@ -236,7 +229,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#reStart(org.javacc.parser.RegularExpression)
    */
   @Override
-  public void reStart(RegularExpression r) {}
+  public void reStart(final RegularExpression r) {}
 
   /**
    * {@inheritDoc}
@@ -244,12 +237,11 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#reEnd(org.javacc.parser.RegularExpression)
    */
   @Override
-  public void reEnd(RegularExpression r) {}
+  public void reEnd(final RegularExpression r) {}
 
   /**
-   * Create an output stream for the generated Jack code. Try to open a file
-   * based on the name of the parser, but if that fails use the standard output
-   * stream.
+   * Create an output stream for the generated Jack code. Try to open a file based on the name of
+   * the parser, but if that fails use the standard output stream.
    */
   protected PrintWriter create_output_stream() {
     if (context.getOutputFile().equals("")) {
@@ -264,11 +256,11 @@ public class TextGenerator implements Generator {
           ext = ".xtext";
         }
 
-        int i = JJDocGlobals.input_file.lastIndexOf('.');
+        final int i = JJDocGlobals.input_file.lastIndexOf('.');
         if (i == -1) {
           JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
         } else {
-          String suffix = JJDocGlobals.input_file.substring(i);
+          final String suffix = JJDocGlobals.input_file.substring(i);
           if (suffix.equals(ext)) {
             JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
           } else {
@@ -282,8 +274,11 @@ public class TextGenerator implements Generator {
 
     try {
       ostr = new java.io.PrintWriter(new java.io.FileWriter(JJDocGlobals.output_file));
-    } catch (java.io.IOException e) {
-      error("JJDoc: can't open output stream on file " + JJDocGlobals.output_file + ".  Using standard output.");
+    } catch (final java.io.IOException e) {
+      error(
+          "JJDoc: can't open output stream on file "
+              + JJDocGlobals.output_file
+              + ".  Using standard output.");
       ostr = new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
     }
 
@@ -296,7 +291,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#debug(java.lang.String)
    */
   @Override
-  public void debug(String message) {
+  public void debug(final String message) {
     System.err.println(message);
   }
 
@@ -306,7 +301,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#info(java.lang.String)
    */
   @Override
-  public void info(String message) {
+  public void info(final String message) {
     System.err.println(message);
   }
 
@@ -316,7 +311,7 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#warn(java.lang.String)
    */
   @Override
-  public void warn(String message) {
+  public void warn(final String message) {
     System.err.println(message);
   }
 
@@ -326,14 +321,13 @@ public class TextGenerator implements Generator {
    * @see org.javacc.jjdoc.Generator#error(java.lang.String)
    */
   @Override
-  public void error(String message) {
+  public void error(final String message) {
     System.err.println(message);
-  }
-  @Override
-  public void lookAheadStart(Lookahead l) {
   }
 
   @Override
-  public void lookAheadEnd(Lookahead l) {
-  }
+  public void lookAheadStart(final Lookahead l) {}
+
+  @Override
+  public void lookAheadEnd(final Lookahead l) {}
 }

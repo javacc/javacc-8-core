@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,35 +24,30 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 /**
- * Describes regular expressions which are referred to just by their name. This
- * means that a regular expression with this name has been declared earlier.
+ * Describes regular expressions which are referred to just by their name.<br>
+ * This means that a regular expression with this name has been declared earlier.
  */
-
 public class RJustName extends RegularExpression {
 
-  /**
-   * "regexpr" points to the regular expression denoted by the name.
-   */
+  /** "regexpr" points to the regular expression denoted by the name. */
   RegularExpression regexpr;
 
   @Override
-  public Nfa GenerateNfa(boolean ignoreCase, LexerContext lexerContext) {
+  public Nfa GenerateNfa(final boolean ignoreCase, final LexerContext lexerContext) {
     return regexpr.GenerateNfa(ignoreCase, lexerContext);
   }
 
   public RJustName() {}
 
-  RJustName(Token token, String image) {
+  RJustName(final Token token, final String image) {
     setLine(token.beginLine);
     setColumn(token.beginColumn);
     label = image;
   }
-
 }

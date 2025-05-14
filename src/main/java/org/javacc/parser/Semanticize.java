@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,10 +24,9 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
@@ -35,14 +37,13 @@ import java.util.List;
 
 public class Semanticize {
 
-  private final Context     context;
+  private final Context context;
   private List<List<RegExprSpec>> removeList = new ArrayList<>();
-  private List<RegExprSpec>       itemList   = new ArrayList<>();
-
+  private List<RegExprSpec> itemList = new ArrayList<>();
 
   private long nextGenerationIndex;
 
-  private Semanticize(Context context) {
+  private Semanticize(final Context context) {
     this.context = context;
     removeList = new ArrayList<>();
     itemList = new ArrayList<>();
@@ -55,14 +56,14 @@ public class Semanticize {
     return context;
   }
 
-  private void prepareToRemove(List<RegExprSpec> vec, RegExprSpec item) {
+  private void prepareToRemove(final List<RegExprSpec> vec, final RegExprSpec item) {
     removeList.add(vec);
     itemList.add(item);
   }
 
   private void removePreparedItems() {
     for (int i = 0; i < removeList.size(); i++) {
-      List<RegExprSpec> list = removeList.get(i);
+      final List<RegExprSpec> list = removeList.get(i);
       list.remove(itemList.get(i));
     }
     removeList.clear();
@@ -73,91 +74,130 @@ public class Semanticize {
     return nextGenerationIndex++;
   }
 
-  public static void start(Context context) throws MetaParseException {
-    Semanticize semanticize = new Semanticize(context);
+  public static void start(final Context context) throws MetaParseException {
+    final Semanticize semanticize = new Semanticize(context);
 
     if (context.errors().get_error_count() != 0) {
       throw new MetaParseException();
     }
 
     if ((Options.getLookahead() > 1) && !Options.getForceLaCheck() && Options.getSanityCheck()) {
-      context.errors().warning("Lookahead adequacy checking not being performed since option LOOKAHEAD "
-          + "is more than 1.  Set option FORCE_LA_CHECK to true to force checking.");
+      context
+          .errors()
+          .warning(
+              "Lookahead adequacy checking not being performed since option LOOKAHEAD "
+                  + "is more than 1.  Set option FORCE_LA_CHECK to true to force checking.");
     }
 
     /*
-     * The following walks the entire parse tree to convert all LOOKAHEAD's that
-     * are not at choice points (but at beginning of sequences) and converts
-     * them to trivial choices. This way, their semantic lookahead specification
-     * can be evaluated during other lookahead evaluations.
+     * The following walks the entire parse tree to convert all LOOKAHEAD's that are not
+     * at choice points (but at beginning of sequences) and converts them to trivial choices.
+     * This way, their semantic lookahead specification can be evaluated
+     * during other lookahead evaluations.
      */
-    for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
+    for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+        it.hasNext(); ) {
       ExpansionTreeWalker.postOrderWalk(it.next().getExpansion(), new LookaheadFixer(context));
     }
 
     /*
      * The following loop populates "production_table"
      */
-    for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
-      NormalProduction p = it.next();
+    for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+        it.hasNext(); ) {
+      final NormalProduction p = it.next();
       if (context.globals().production_table.put(p.getLhs(), p) != null) {
-        context.errors().semantic_error(p, p.getLhs() + " occurs on the left hand side of more than one production.");
+        context
+            .errors()
+            .semantic_error(
+                p, p.getLhs() + " occurs on the left hand side of more than one production.");
       }
     }
 
     /*
-     * The following walks the entire parse tree to make sure that all
-     * non-terminals on RHS's are defined on the LHS.
+     * The following walks the entire parse tree to make sure that
+     * all non-terminals on RHS's are defined on the LHS.
      */
-    for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
-      ExpansionTreeWalker.preOrderWalk(it.next().getExpansion(), new ProductionDefinedChecker(context));
+    for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+        it.hasNext(); ) {
+      ExpansionTreeWalker.preOrderWalk(
+          it.next().getExpansion(), new ProductionDefinedChecker(context));
     }
 
     /*
      * The following loop ensures that all target lexical states are defined.
-     * Also piggybacking on this loop is the detection of <EOF> and <name> in
-     * token productions. After reporting an error, these entries are removed.
-     * Also checked are definitions on inline private regular expressions. This
-     * loop works slightly differently when USER_TOKEN_MANAGER is set to true.
-     * In this case, <name> occurrences are OK, while regular expression specs
-     * generate a warning.
+     * Also piggybacking on this loop is the detection of <EOF> and <name> in token productions.
+     * After reporting an error, these entries are removed.
+     * Also checked are definitions on inline private regular expressions.
+     * This loop works slightly differently when USER_TOKEN_MANAGER is set to true.
+     * In this case, <name> occurrences are OK, while regular expression specs generate a warning.
      */
-    for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-      TokenProduction tp = it.next();
-      List<RegExprSpec> respecs = tp.respecs;
-      for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-        RegExprSpec res = it1.next();
+    for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+        it.hasNext(); ) {
+      final TokenProduction tp = it.next();
+      final List<RegExprSpec> respecs = tp.respecs;
+      for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+        final RegExprSpec res = it1.next();
         if (res.nextState != null) {
           if (context.globals().lexstate_S2I.get(res.nextState) == null) {
-            context.errors().semantic_error(res.nsTok, "Lexical state \"" + res.nextState + "\" has not been defined.");
+            context
+                .errors()
+                .semantic_error(
+                    res.nsTok, "Lexical state \"" + res.nextState + "\" has not been defined.");
           }
         }
         if (res.rexp instanceof REndOfFile) {
           // context.errors().semantic_error(res.rexp, "Badly placed <EOF>.");
           if (tp.lexStates != null) {
-            context.errors().semantic_error(res.rexp,
-                "EOF action/state change must be specified for all states, " + "i.e., <*>TOKEN:.");
+            context
+                .errors()
+                .semantic_error(
+                    res.rexp,
+                    "EOF action/state change must be specified for all states, "
+                        + "i.e., <*>TOKEN:.");
           }
           if (tp.kind != TokenProduction.TOKEN) {
-            context.errors().semantic_error(res.rexp,
-                "EOF action/state change can be specified only in a " + "TOKEN specification.");
+            context
+                .errors()
+                .semantic_error(
+                    res.rexp,
+                    "EOF action/state change can be specified only in a " + "TOKEN specification.");
           }
-          if ((context.globals().nextStateForEof != null) || (context.globals().actForEof != null)) {
-            context.errors().semantic_error(res.rexp, "Duplicate action/state change specification for <EOF>.");
+          if ((context.globals().nextStateForEof != null)
+              || (context.globals().actForEof != null)) {
+            context
+                .errors()
+                .semantic_error(res.rexp, "Duplicate action/state change specification for <EOF>.");
           }
           context.globals().actForEof = res.act;
           context.globals().nextStateForEof = res.nextState;
           semanticize.prepareToRemove(respecs, res);
         } else if (tp.isExplicit && Options.getUserTokenManager()) {
-          context.errors().warning(res.rexp,
-              "Ignoring regular expression specification since " + "option USER_TOKEN_MANAGER has been set to true.");
-        } else if (tp.isExplicit && !Options.getUserTokenManager() && (res.rexp instanceof RJustName)) {
-          context.errors().warning(res.rexp, "Ignoring free-standing regular expression reference.  "
-              + "If you really want this, you must give it a different label as <NEWLABEL:<" + res.rexp.label + ">>.");
+          context
+              .errors()
+              .warning(
+                  res.rexp,
+                  "Ignoring regular expression specification since "
+                      + "option USER_TOKEN_MANAGER has been set to true.");
+        } else if (tp.isExplicit
+            && !Options.getUserTokenManager()
+            && (res.rexp instanceof RJustName)) {
+          context
+              .errors()
+              .warning(
+                  res.rexp,
+                  "Ignoring free-standing regular expression reference.  "
+                      + "If you really want this, you must give it a different label as <NEWLABEL:<"
+                      + res.rexp.label
+                      + ">>.");
           semanticize.prepareToRemove(respecs, res);
         } else if (!tp.isExplicit && res.rexp.private_rexp) {
-          context.errors().semantic_error(res.rexp,
-              "Private (#) regular expression cannot be defined within " + "grammar productions.");
+          context
+              .errors()
+              .semantic_error(
+                  res.rexp,
+                  "Private (#) regular expression cannot be defined within "
+                      + "grammar productions.");
         }
       }
     }
@@ -166,68 +206,77 @@ public class Semanticize {
 
     /*
      * The following loop inserts all names of regular expressions into
-     * "named_tokens_table" and "ordered_named_tokens". Duplications are flagged
-     * as errors.
+     * "named_tokens_table" and "ordered_named_tokens". Duplications are flagged as errors.
      */
-    for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-      TokenProduction tp = it.next();
-      List<RegExprSpec> respecs = tp.respecs;
-      for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-        RegExprSpec res = it1.next();
+    for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+        it.hasNext(); ) {
+      final TokenProduction tp = it.next();
+      final List<RegExprSpec> respecs = tp.respecs;
+      for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+        final RegExprSpec res = it1.next();
         if (!(res.rexp instanceof RJustName) && !res.rexp.label.equals("")) {
-          String s = res.rexp.label;
-          Object obj = context.globals().named_tokens_table.put(s, res.rexp);
+          final String s = res.rexp.label;
+          final Object obj = context.globals().named_tokens_table.put(s, res.rexp);
           if (obj != null) {
-            context.errors().semantic_error(res.rexp, "Multiply defined lexical token name \"" + s + "\".");
+            context
+                .errors()
+                .semantic_error(res.rexp, "Multiply defined lexical token name \"" + s + "\".");
           } else {
             context.globals().ordered_named_tokens.add(res.rexp);
           }
           if (context.globals().lexstate_S2I.get(s) != null) {
-            context.errors().semantic_error(res.rexp,
-                "Lexical token name \"" + s + "\" is the same as " + "that of a lexical state.");
+            context
+                .errors()
+                .semantic_error(
+                    res.rexp,
+                    "Lexical token name \""
+                        + s
+                        + "\" is the same as "
+                        + "that of a lexical state.");
           }
         }
       }
     }
 
     /*
-     * The following code merges multiple uses of the same string in the same
-     * lexical state and produces error messages when there are multiple
-     * explicit occurrences (outside the BNF) of the string in the same lexical
-     * state, or when within BNF occurrences of a string are duplicates of those
-     * that occur as non-TOKEN's (SKIP, MORE, SPECIAL_TOKEN) or private regular
-     * expressions. While doing this, this code also numbers all regular
-     * expressions (by setting their ordinal values), and populates the table
-     * "names_of_tokens".
+     * The following code merges multiple uses of the same string in the same lexical state
+     * and produces error messages when there are multiple explicit occurrences (outside the BNF)
+     * of the string in the same lexical state, or when within BNF occurrences of a string are
+     * duplicates of those that occur as non-TOKEN's (SKIP, MORE, SPECIAL_TOKEN) or private regular
+     * expressions
+     * While doing this, this code also numbers all regular expressions (by setting their ordinal
+     * values), and populates the table "names_of_tokens".
      */
 
     context.globals().tokenCount = 1;
-    for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-      TokenProduction tp = it.next();
-      List<RegExprSpec> respecs = tp.respecs;
+    for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+        it.hasNext(); ) {
+      final TokenProduction tp = it.next();
+      final List<RegExprSpec> respecs = tp.respecs;
       if (tp.lexStates == null) {
         tp.lexStates = new String[context.globals().lexstate_I2S.size()];
         int i = 0;
-        for (Enumeration<String> enum1 = context.globals().lexstate_I2S.elements(); enum1.hasMoreElements();) {
+        for (final Enumeration<String> enum1 = context.globals().lexstate_I2S.elements();
+            enum1.hasMoreElements(); ) {
           tp.lexStates[i++] = enum1.nextElement();
         }
       }
-      Hashtable<String, Hashtable<String, RegularExpression>> table[] = new Hashtable[tp.lexStates.length];
+      @SuppressWarnings("unchecked")
+      final Hashtable<String, Hashtable<String, RegularExpression>> table[] =
+          new Hashtable[tp.lexStates.length];
       for (int i = 0; i < tp.lexStates.length; i++) {
         table[i] = context.globals().simple_tokens_table.get(tp.lexStates[i]);
       }
-      for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-        RegExprSpec res = it1.next();
+      for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+        final RegExprSpec res = it1.next();
         if (res.rexp instanceof RStringLiteral) {
-          RStringLiteral sl = (RStringLiteral) res.rexp;
-          // This loop performs the checks and actions with respect to each
-          // lexical state.
+          final RStringLiteral sl = (RStringLiteral) res.rexp;
+          // This loop performs the checks and actions with respect to each lexical state.
           for (int i = 0; i < table.length; i++) {
             // Get table of all case variants of "sl.image" into table2.
             Hashtable<String, RegularExpression> table2 = table[i].get(sl.image.toUpperCase());
             if (table2 == null) {
-              // There are no case variants of "sl.image" earlier than the
-              // current one.
+              // There are no case variants of "sl.image" earlier than the current one.
               // So go ahead and insert this item.
               if (sl.ordinal == 0) {
                 sl.ordinal = context.globals().tokenCount++;
@@ -235,33 +284,43 @@ public class Semanticize {
               table2 = new Hashtable<>();
               table2.put(sl.image, sl);
               table[i].put(sl.image.toUpperCase(), table2);
-            } else if (hasIgnoreCase(table2, sl.image)) { // hasIgnoreCase
-              // sets
-              // "other"
-              // if it
-              // is
-              // found.
-              // Since IGNORE_CASE version exists, current one is useless and
-              // bad.
+            } else if (hasIgnoreCase(table2, sl.image)) {
+              // hasIgnoreCase sets "other" if it is found.
+              // Since IGNORE_CASE version exists, current one is useless and bad.
               if (!sl.tpContext.isExplicit) {
                 // inline BNF string is used earlier with an IGNORE_CASE.
-                context.errors().semantic_error(sl,
-                    "String \"" + sl.image + "\" can never be matched "
-                        + "due to presence of more general (IGNORE_CASE) regular expression " + "at line "
-                        + other.getLine() + ", column " + other.getColumn() + ".");
+                context
+                    .errors()
+                    .semantic_error(
+                        sl,
+                        "String \""
+                            + sl.image
+                            + "\" can never be matched "
+                            + "due to presence of more general (IGNORE_CASE) regular expression "
+                            + "at line "
+                            + other.getLine()
+                            + ", column "
+                            + other.getColumn()
+                            + ".");
               } else {
                 // give the standard error message.
-                context.errors().semantic_error(sl,
-                    "Duplicate definition of string token \"" + sl.image + "\" " + "can never be matched.");
+                context
+                    .errors()
+                    .semantic_error(
+                        sl,
+                        "Duplicate definition of string token \""
+                            + sl.image
+                            + "\" "
+                            + "can never be matched.");
               }
             } else if (sl.tpContext.ignoreCase) {
-              // This has to be explicit. A warning needs to be given with
-              // respect
-              // to all previous strings.
+              // This has to be explicit.
+              // A warning needs to be given with respect to all previous strings.
               String pos = "";
               int count = 0;
-              for (Enumeration<RegularExpression> enum2 = table2.elements(); enum2.hasMoreElements();) {
-                RegularExpression rexp = enum2.nextElement();
+              for (final Enumeration<RegularExpression> enum2 = table2.elements();
+                  enum2.hasMoreElements(); ) {
+                final RegularExpression rexp = enum2.nextElement();
                 if (count != 0) {
                   pos += ",";
                 }
@@ -269,21 +328,30 @@ public class Semanticize {
                 count++;
               }
               if (count == 1) {
-                context.errors().warning(sl, "String with IGNORE_CASE is partially superceded by string at" + pos + ".");
+                context
+                    .errors()
+                    .warning(
+                        sl,
+                        "String with IGNORE_CASE is partially superceded by string at" + pos + ".");
               } else {
-                context.errors().warning(sl, "String with IGNORE_CASE is partially superceded by strings at" + pos + ".");
+                context
+                    .errors()
+                    .warning(
+                        sl,
+                        "String with IGNORE_CASE is partially superceded by strings at"
+                            + pos
+                            + ".");
               }
               // This entry is legitimate. So insert it.
               if (sl.ordinal == 0) {
                 sl.ordinal = context.globals().tokenCount++;
               }
               table2.put(sl.image, sl);
-              // The above "put" may override an existing entry (that is not
-              // IGNORE_CASE) and that's
-              // the desired behavior.
+              // The above "put" may override an existing entry
+              // (that is not IGNORE_CASE) and that's the desired behavior.
             } else {
               // The rest of the cases do not involve IGNORE_CASE.
-              RegularExpression re = table2.get(sl.image);
+              final RegularExpression re = table2.get(sl.image);
               if (re == null) {
                 if (sl.ordinal == 0) {
                   sl.ordinal = context.globals().tokenCount++;
@@ -292,28 +360,47 @@ public class Semanticize {
               } else if (tp.isExplicit) {
                 // This is an error even if the first occurrence was implicit.
                 if (tp.lexStates[i].equals(LexGen.DEFAULT_STATE)) {
-                  context.errors().semantic_error(sl, "Duplicate definition of string token \"" + sl.image + "\".");
+                  context
+                      .errors()
+                      .semantic_error(
+                          sl, "Duplicate definition of string token \"" + sl.image + "\".");
                 } else {
-                  context.errors().semantic_error(sl, "Duplicate definition of string token \"" + sl.image
-                      + "\" in lexical state \"" + tp.lexStates[i] + "\".");
+                  context
+                      .errors()
+                      .semantic_error(
+                          sl,
+                          "Duplicate definition of string token \""
+                              + sl.image
+                              + "\" in lexical state \""
+                              + tp.lexStates[i]
+                              + "\".");
                 }
               } else if (re.tpContext.kind != TokenProduction.TOKEN) {
-                context.errors().semantic_error(sl, "String token \"" + sl.image + "\" has been defined as a \""
-                    + TokenProduction.kindImage[re.tpContext.kind] + "\" token.");
+                context
+                    .errors()
+                    .semantic_error(
+                        sl,
+                        "String token \""
+                            + sl.image
+                            + "\" has been defined as a \""
+                            + TokenProduction.kindImage[re.tpContext.kind]
+                            + "\" token.");
               } else if (re.private_rexp) {
-                context.errors().semantic_error(sl,
-                    "String token \"" + sl.image + "\" has been defined as a private regular expression.");
+                context
+                    .errors()
+                    .semantic_error(
+                        sl,
+                        "String token \""
+                            + sl.image
+                            + "\" has been defined as a private regular expression.");
               } else {
-                // This is now a legitimate reference to an existing
-                // RStringLiteral.
+                // This is now a legitimate reference to an existing RStringLiteral.
                 // So we assign it a number and take it out of "rexprlist".
-                // Therefore, if all is OK (no errors), then there will be only
-                // unequal
-                // string literals in each lexical state. Note that the only way
-                // this can be legal is if this is a string declared inline
-                // within the
-                // BNF. Hence, it belongs to only one lexical state - namely
-                // "DEFAULT".
+                // Therefore, if all is OK (no errors), then there will be only unequal
+                // string literals in each lexical state.
+                // Note that the only way this can be legal is if this is a string declared inline
+                // within the BNF.
+                // Hence, it belongs to only one lexical state - namely "DEFAULT".
                 sl.ordinal = re.ordinal;
                 semanticize.prepareToRemove(respecs, res);
               }
@@ -335,21 +422,22 @@ public class Semanticize {
 
     /*
      * The following code performs a tree walk on all regular expressions
-     * attaching links to "RJustName"s. Error messages are given if undeclared
-     * names are used, or if "RJustNames" refer to private regular expressions
-     * or to regular expressions of any kind other than TOKEN. In addition, this
-     * loop also removes top level "RJustName"s from "rexprlist". This code is
-     * not executed if Options.getUserTokenManager() is set to true. Instead the
-     * following block of code is executed.
+     * attaching links to "RJustName"s.
+     * Error messages are given if undeclared names are used, or if "RJustNames" refer to private
+     * regular expressions or to regular expressions of any kind other than TOKEN.
+     * In addition, this loop also removes top level "RJustName"s from "rexprlist".
+     * This code is not executed if Options.getUserTokenManager() is set to true.
+     * Instead the following block of code is executed.
      */
 
     if (!Options.getUserTokenManager()) {
-      FixRJustNames frjn = new FixRJustNames(context);
-      for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-        TokenProduction tp = it.next();
-        List<RegExprSpec> respecs = tp.respecs;
-        for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-          RegExprSpec res = it1.next();
+      final FixRJustNames frjn = new FixRJustNames(context);
+      for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+          it.hasNext(); ) {
+        final TokenProduction tp = it.next();
+        final List<RegExprSpec> respecs = tp.respecs;
+        for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+          final RegExprSpec res = it1.next();
           frjn.root = res.rexp;
           ExpansionTreeWalker.preOrderWalk(res.rexp, frjn);
           if (res.rexp instanceof RJustName) {
@@ -362,26 +450,27 @@ public class Semanticize {
     semanticize.removePreparedItems();
 
     /*
-     * The following code is executed only if Options.getUserTokenManager() is
-     * set to true. This code visits all top-level "RJustName"s (ignores
-     * "RJustName"s nested within regular expressions). Since regular
-     * expressions are optional in this case, "RJustName"s without corresponding
-     * regular expressions are given ordinal values here. If "RJustName"s refer
-     * to a named regular expression, their ordinal values are set to reflect
-     * this. All but one "RJustName" node is removed from the lists by the end
-     * of execution of this code.
+     * The following code is executed only if Options.getUserTokenManager() is set to true.
+     * This code visits all top-level "RJustName"s (ignores "RJustName"s nested within regular
+     * expressions).
+     * Since regular expressions are optional in this case, "RJustName"s without corresponding
+     * regular expressions are given ordinal values here.
+     * If "RJustName"s refer to a named regular expression, their ordinal values are set to reflect
+     * this.
+     * All but one "RJustName" node is removed from the lists by the end of execution of this code.
      */
 
     if (Options.getUserTokenManager()) {
-      for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-        TokenProduction tp = it.next();
-        List<RegExprSpec> respecs = tp.respecs;
-        for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-          RegExprSpec res = it1.next();
+      for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+          it.hasNext(); ) {
+        final TokenProduction tp = it.next();
+        final List<RegExprSpec> respecs = tp.respecs;
+        for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+          final RegExprSpec res = it1.next();
           if (res.rexp instanceof RJustName) {
 
-            RJustName jn = (RJustName) res.rexp;
-            RegularExpression rexp = context.globals().named_tokens_table.get(jn.label);
+            final RJustName jn = (RJustName) res.rexp;
+            final RegularExpression rexp = context.globals().named_tokens_table.get(jn.label);
             if (rexp == null) {
               jn.ordinal = context.globals().tokenCount++;
               context.globals().named_tokens_table.put(jn.label, jn);
@@ -399,22 +488,26 @@ public class Semanticize {
     semanticize.removePreparedItems();
 
     /*
-     * The following code is executed only if Options.getUserTokenManager() is
-     * set to true. This loop labels any unlabeled regular expression and prints
-     * a warning that it is doing so. These labels are added to
-     * "ordered_named_tokens" so that they may be generated into the
+     * The following code is executed only if Options.getUserTokenManager() is set to true.
+     * This loop labels any unlabeled regular expression and prints a warning that it is doing so.
+     * These labels are added to "ordered_named_tokens" so that they may be generated into the
      * ...Constants file.
      */
     if (Options.getUserTokenManager()) {
-      for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-        TokenProduction tp = it.next();
-        List<RegExprSpec> respecs = tp.respecs;
-        for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-          RegExprSpec res = it1.next();
-          Integer ii = Integer.valueOf(res.rexp.ordinal);
+      for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+          it.hasNext(); ) {
+        final TokenProduction tp = it.next();
+        final List<RegExprSpec> respecs = tp.respecs;
+        for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+          final RegExprSpec res = it1.next();
+          final Integer ii = Integer.valueOf(res.rexp.ordinal);
           if (context.globals().names_of_tokens.get(ii) == null) {
-            context.errors().warning(res.rexp,
-                "Unlabeled regular expression cannot be referred to by " + "user generated token manager.");
+            context
+                .errors()
+                .warning(
+                    res.rexp,
+                    "Unlabeled regular expression cannot be referred to by "
+                        + "user generated token manager.");
           }
         }
       }
@@ -424,16 +517,15 @@ public class Semanticize {
       throw new MetaParseException();
     }
 
-    // The following code sets the value of the "emptyPossible" field of
-    // NormalProduction
-    // nodes. This field is initialized to false, and then the entire list of
-    // productions is processed. This is repeated as long as at least one item
-    // got updated from false to true in the pass.
+    // The following code sets the value of the "emptyPossible" field of NormalProduction nodes.
+    // This field is initialized to false, and then the entire list of productions is processed.
+    // This is repeated as long as at least one item got updated from false to true in the pass.
     boolean emptyUpdate = true;
     while (emptyUpdate) {
       emptyUpdate = false;
-      for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
-        NormalProduction prod = it.next();
+      for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+          it.hasNext(); ) {
+        final NormalProduction prod = it.next();
         if (emptyExpansionExists(prod.getExpansion())) {
           if (!prod.isEmptyPossible()) {
             emptyUpdate = prod.setEmptyPossible(true);
@@ -444,53 +536,54 @@ public class Semanticize {
 
     if (Options.getSanityCheck() && (context.errors().get_error_count() == 0)) {
 
-      // The following code checks that all ZeroOrMore, ZeroOrOne, and OneOrMore
-      // nodes
+      // The following code checks that all ZeroOrMore, ZeroOrOne, and OneOrMore nodes
       // do not contain expansions that can expand to the empty token list.
-      for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
+      for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+          it.hasNext(); ) {
         ExpansionTreeWalker.preOrderWalk(it.next().getExpansion(), new EmptyChecker(context));
       }
 
-      // The following code goes through the productions and adds pointers to
-      // other
-      // productions that it can expand to without consuming any tokens. Once
-      // this is
-      // done, a left-recursion check can be performed.
-      for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
-        NormalProduction prod = it.next();
+      // The following code goes through the productions and adds pointers to other
+      // productions that it can expand to without consuming any tokens.
+      // Once this is done, a left-recursion check can be performed.
+      for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+          it.hasNext(); ) {
+        final NormalProduction prod = it.next();
         addLeftMost(prod, prod.getExpansion());
       }
 
       // Now the following loop calls a recursive walk routine that searches for
-      // actual left recursions. The way the algorithm is coded, once a node has
-      // been determined to participate in a left recursive loop, it is not
-      // tried
-      // in any other loop.
-      for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
-        NormalProduction prod = it.next();
+      // actual left recursions.
+      // The way the algorithm is coded, once a node has been determined to participate in a
+      // left recursive loop, it is not tried in any other loop.
+      for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+          it.hasNext(); ) {
+        final NormalProduction prod = it.next();
         if (prod.getWalkStatus() == 0) {
           prodWalk(prod, context);
         }
       }
 
-      // Now we do a similar, but much simpler walk for the regular expression
-      // part of
-      // the grammar. Here we are looking for any kind of loop, not just left
-      // recursions,
+      // Now we do a similar, but much simpler walk for the regular expression part of the grammar.
+      // Here we are looking for any kind of loop, not just left recursions,
       // so we only need to do the equivalent of the above walk.
       // This is not done if option USER_TOKEN_MANAGER is set to true.
       if (!Options.getUserTokenManager()) {
-        for (Iterator<TokenProduction> it = context.globals().rexprlist.iterator(); it.hasNext();) {
-          TokenProduction tp = it.next();
-          List<RegExprSpec> respecs = tp.respecs;
-          for (Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext();) {
-            RegExprSpec res = it1.next();
-            RegularExpression rexp = res.rexp;
+        for (final Iterator<TokenProduction> it = context.globals().rexprlist.iterator();
+            it.hasNext(); ) {
+          final TokenProduction tp = it.next();
+          final List<RegExprSpec> respecs = tp.respecs;
+          for (final Iterator<RegExprSpec> it1 = respecs.iterator(); it1.hasNext(); ) {
+            final RegExprSpec res = it1.next();
+            final RegularExpression rexp = res.rexp;
             if (rexp.walkStatus == 0) {
               rexp.walkStatus = -1;
               if (rexpWalk(rexp, context)) {
                 loopString = "..." + rexp.label + "... --> " + loopString;
-                context.errors().semantic_error(rexp, "Loop in regular expression detected: \"" + loopString + "\"");
+                context
+                    .errors()
+                    .semantic_error(
+                        rexp, "Loop in regular expression detected: \"" + loopString + "\"");
               }
               rexp.walkStatus = 1;
             }
@@ -502,31 +595,31 @@ public class Semanticize {
        * The following code performs the lookahead ambiguity checking.
        */
       if (context.errors().get_error_count() == 0) {
-        for (Iterator<NormalProduction> it = context.globals().bnfproductions.iterator(); it.hasNext();) {
-          ExpansionTreeWalker.preOrderWalk(it.next().getExpansion(), new LookaheadChecker(semanticize));
+        for (final Iterator<NormalProduction> it = context.globals().bnfproductions.iterator();
+            it.hasNext(); ) {
+          ExpansionTreeWalker.preOrderWalk(
+              it.next().getExpansion(), new LookaheadChecker(semanticize));
         }
       }
-
     } // matches "if (Options.getSanityCheck()) {"
 
     if (context.errors().get_error_count() != 0) {
       throw new MetaParseException();
     }
-
   }
 
   private static RegularExpression other;
 
-  // Checks to see if the "str" is superceded by another equal (except case)
-  // string
-  // in table.
-  private static boolean hasIgnoreCase(Hashtable<String, RegularExpression> table, String str) {
+  /** Checks to see if the "str" is superceded by another equal (except case) string in table. */
+  private static boolean hasIgnoreCase(
+      final Hashtable<String, RegularExpression> table, final String str) {
     RegularExpression rexp;
     rexp = table.get(str);
     if ((rexp != null) && !rexp.tpContext.ignoreCase) {
       return false;
     }
-    for (Enumeration<RegularExpression> enumeration = table.elements(); enumeration.hasMoreElements();) {
+    for (final Enumeration<RegularExpression> enumeration = table.elements();
+        enumeration.hasMoreElements(); ) {
       rexp = enumeration.nextElement();
       if (rexp.tpContext.ignoreCase) {
         other = rexp;
@@ -536,9 +629,8 @@ public class Semanticize {
     return false;
   }
 
-  // returns true if "exp" can expand to the empty string, returns false
-  // otherwise.
-  public static boolean emptyExpansionExists(Expansion exp) {
+  /** Returns true if "exp" can expand to the empty string, returns false otherwise. */
+  public static boolean emptyExpansionExists(final Expansion exp) {
     if (exp instanceof NonTerminal) {
       return ((NonTerminal) exp).getProd().isEmptyPossible();
     } else if (exp instanceof Action) {
@@ -552,14 +644,14 @@ public class Semanticize {
     } else if (exp instanceof Lookahead) {
       return true;
     } else if (exp instanceof Choice) {
-      for (Iterator<Expansion> it = ((Choice) exp).getChoices().iterator(); it.hasNext();) {
+      for (final Iterator<Expansion> it = ((Choice) exp).getChoices().iterator(); it.hasNext(); ) {
         if (emptyExpansionExists(it.next())) {
           return true;
         }
       }
       return false;
     } else if (exp instanceof Sequence) {
-      for (Iterator<Expansion> it = ((Sequence) exp).units.iterator(); it.hasNext();) {
+      for (final Iterator<Expansion> it = ((Sequence) exp).units.iterator(); it.hasNext(); ) {
         if (!emptyExpansionExists(it.next())) {
           return false;
         }
@@ -572,8 +664,8 @@ public class Semanticize {
     }
   }
 
-  // Updates prod.leftExpansions based on a walk of exp.
-  static private void addLeftMost(NormalProduction prod, Expansion exp) {
+  /** Updates prod.leftExpansions based on a walk of exp. */
+  private static void addLeftMost(final NormalProduction prod, final Expansion exp) {
     if (exp instanceof NonTerminal) {
       for (int i = 0; i < prod.leIndex; i++) {
         if (prod.getLeftExpansions()[i] == ((NonTerminal) exp).getProd()) {
@@ -581,7 +673,7 @@ public class Semanticize {
         }
       }
       if (prod.leIndex == prod.getLeftExpansions().length) {
-        NormalProduction[] newle = new NormalProduction[prod.leIndex * 2];
+        final NormalProduction[] newle = new NormalProduction[prod.leIndex * 2];
         System.arraycopy(prod.getLeftExpansions(), 0, newle, 0, prod.leIndex);
         prod.setLeftExpansions(newle);
       }
@@ -593,12 +685,12 @@ public class Semanticize {
     } else if (exp instanceof ZeroOrOne) {
       addLeftMost(prod, ((ZeroOrOne) exp).getExpansion());
     } else if (exp instanceof Choice) {
-      for (Iterator<Expansion> it = ((Choice) exp).getChoices().iterator(); it.hasNext();) {
+      for (final Iterator<Expansion> it = ((Choice) exp).getChoices().iterator(); it.hasNext(); ) {
         addLeftMost(prod, it.next());
       }
     } else if (exp instanceof Sequence) {
-      for (Iterator<Expansion> it = ((Sequence) exp).units.iterator(); it.hasNext();) {
-        Expansion e = it.next();
+      for (final Iterator<Expansion> it = ((Sequence) exp).units.iterator(); it.hasNext(); ) {
+        final Expansion e = it.next();
         addLeftMost(prod, e);
         if (!emptyExpansionExists(e)) {
           break;
@@ -609,12 +701,14 @@ public class Semanticize {
     }
   }
 
-  // The string in which the following methods store information.
-  static private String loopString;
+  /** The string in which the following methods store information. */
+  private static String loopString;
 
-  // Returns true to indicate an unraveling of a detected left recursion loop,
-  // and returns false otherwise.
-  static private boolean prodWalk(NormalProduction prod, Context context) {
+  /**
+   * Returns true to indicate an unraveling of a detected left recursion loop,<br>
+   * and returns false otherwise.
+   */
+  private static boolean prodWalk(final NormalProduction prod, final Context context) {
     prod.setWalkStatus(-1);
     for (int i = 0; i < prod.leIndex; i++) {
       if (prod.getLeftExpansions()[i].getWalkStatus() == -1) {
@@ -633,7 +727,9 @@ public class Semanticize {
           loopString = prod.getLhs() + "... --> " + loopString;
           if (prod.getWalkStatus() == -2) {
             prod.setWalkStatus(1);
-            context.errors().semantic_error(prod, "Left recursion detected: \"" + loopString + "\"");
+            context
+                .errors()
+                .semantic_error(prod, "Left recursion detected: \"" + loopString + "\"");
             return false;
           } else {
             prod.setWalkStatus(1);
@@ -646,16 +742,18 @@ public class Semanticize {
     return false;
   }
 
-  // Returns true to indicate an unraveling of a detected loop,
-  // and returns false otherwise.
-  static private boolean rexpWalk(RegularExpression rexp, Context context) {
+  /**
+   * Returns true to indicate an unraveling of a detected loop,<br>
+   * and returns false otherwise.
+   */
+  private static boolean rexpWalk(final RegularExpression rexp, final Context context) {
     if (rexp instanceof RJustName) {
-      RJustName jn = (RJustName) rexp;
+      final RJustName jn = (RJustName) rexp;
       if (jn.regexpr.walkStatus == -1) {
         jn.regexpr.walkStatus = -2;
         loopString = "..." + jn.regexpr.label + "...";
-        // Note: Only the regexpr's of RJustName nodes and the top leve
-        // regexpr's can have labels. Hence it is only in these cases that
+        // Note: Only the regexpr's of RJustName nodes and the top level regexpr's
+        // can have labels. Hence it is only in these cases that
         // the labels are checked for to be added to the loopString.
         return true;
       } else if (jn.regexpr.walkStatus == 0) {
@@ -664,7 +762,10 @@ public class Semanticize {
           loopString = "..." + jn.regexpr.label + "... --> " + loopString;
           if (jn.regexpr.walkStatus == -2) {
             jn.regexpr.walkStatus = 1;
-            context.errors().semantic_error(jn.regexpr, "Loop in regular expression detected: \"" + loopString + "\"");
+            context
+                .errors()
+                .semantic_error(
+                    jn.regexpr, "Loop in regular expression detected: \"" + loopString + "\"");
             return false;
           } else {
             jn.regexpr.walkStatus = 1;
@@ -676,14 +777,16 @@ public class Semanticize {
         }
       }
     } else if (rexp instanceof RChoice) {
-      for (Iterator<RegularExpression> it = ((RChoice) rexp).getChoices().iterator(); it.hasNext();) {
+      for (final Iterator<RegularExpression> it = ((RChoice) rexp).getChoices().iterator();
+          it.hasNext(); ) {
         if (rexpWalk(it.next(), context)) {
           return true;
         }
       }
       return false;
     } else if (rexp instanceof RSequence) {
-      for (Iterator<RegularExpression> it = ((RSequence) rexp).units.iterator(); it.hasNext();) {
+      for (final Iterator<RegularExpression> it = ((RSequence) rexp).units.iterator();
+          it.hasNext(); ) {
         if (rexpWalk(it.next(), context)) {
           return true;
         }
@@ -702,8 +805,8 @@ public class Semanticize {
   }
 
   /**
-   * Objects of this class are created from class Semanticize to work on
-   * references to regular expressions from RJustName's.
+   * Objects of this class are created from class Semanticize to work on references to regular
+   * expressions from RJustName's.
    */
   private static class FixRJustNames implements TreeWalkerOp {
 
@@ -715,35 +818,48 @@ public class Semanticize {
      *
      * @param context
      */
-    private FixRJustNames(Context context) {
+    private FixRJustNames(final Context context) {
       this.context = context;
     }
 
     @Override
-    public boolean goDeeper(Expansion e) {
+    public boolean goDeeper(final Expansion e) {
       return true;
     }
 
     @Override
-    public void action(Expansion e) {
+    public void action(final Expansion e) {
       if (e instanceof RJustName) {
-        RJustName jn = (RJustName) e;
-        RegularExpression rexp = context.globals().named_tokens_table.get(jn.label);
+        final RJustName jn = (RJustName) e;
+        final RegularExpression rexp = context.globals().named_tokens_table.get(jn.label);
         if (rexp == null) {
           context.errors().semantic_error(e, "Undefined lexical token name \"" + jn.label + "\".");
         } else if ((jn == root) && !jn.tpContext.isExplicit && rexp.private_rexp) {
-          context.errors().semantic_error(e,
-              "Token name \"" + jn.label + "\" refers to a private " + "(with a #) regular expression.");
-        } else if ((jn == root) && !jn.tpContext.isExplicit && (rexp.tpContext.kind != TokenProduction.TOKEN)) {
-          context.errors().semantic_error(e, "Token name \"" + jn.label + "\" refers to a non-token "
-              + "(SKIP, MORE, IGNORE_IN_BNF) regular expression.");
+          context
+              .errors()
+              .semantic_error(
+                  e,
+                  "Token name \""
+                      + jn.label
+                      + "\" refers to a private "
+                      + "(with a #) regular expression.");
+        } else if ((jn == root)
+            && !jn.tpContext.isExplicit
+            && (rexp.tpContext.kind != TokenProduction.TOKEN)) {
+          context
+              .errors()
+              .semantic_error(
+                  e,
+                  "Token name \""
+                      + jn.label
+                      + "\" refers to a non-token "
+                      + "(SKIP, MORE, IGNORE_IN_BNF) regular expression.");
         } else {
           jn.ordinal = rexp.ordinal;
           jn.regexpr = rexp;
         }
       }
     }
-
   }
 
   private static class LookaheadFixer implements TreeWalkerOp {
@@ -755,12 +871,12 @@ public class Semanticize {
      *
      * @param context
      */
-    private LookaheadFixer(Context context) {
+    private LookaheadFixer(final Context context) {
       this.context = context;
     }
 
     @Override
-    public boolean goDeeper(Expansion e) {
+    public boolean goDeeper(final Expansion e) {
       if (e instanceof RegularExpression) {
         return false;
       } else {
@@ -769,29 +885,31 @@ public class Semanticize {
     }
 
     @Override
-    public void action(Expansion e) {
+    public void action(final Expansion e) {
       if (e instanceof Sequence) {
-        if ((e.parent instanceof Choice) || (e.parent instanceof ZeroOrMore) || (e.parent instanceof OneOrMore)
+        if ((e.parent instanceof Choice)
+            || (e.parent instanceof ZeroOrMore)
+            || (e.parent instanceof OneOrMore)
             || (e.parent instanceof ZeroOrOne)) {
           return;
         }
-        Sequence seq = (Sequence) e;
-        Lookahead la = (Lookahead) seq.units.get(0);
+        final Sequence seq = (Sequence) e;
+        final Lookahead la = (Lookahead) seq.units.get(0);
         if (!la.isExplicit()) {
           return;
         }
         // Create a singleton choice with an empty action.
-        Choice ch = new Choice();
+        final Choice ch = new Choice();
         ch.setLine(la.getLine());
         ch.setColumn(la.getColumn());
         ch.parent = seq;
-        Sequence seq1 = new Sequence();
+        final Sequence seq1 = new Sequence();
         seq1.setLine(la.getLine());
         seq1.setColumn(la.getColumn());
         seq1.parent = ch;
         seq1.units.add(la);
         la.parent = seq1;
-        Action act = new Action();
+        final Action act = new Action();
         act.setLine(la.getLine());
         act.setColumn(la.getColumn());
         act.parent = seq1;
@@ -799,29 +917,34 @@ public class Semanticize {
         ch.getChoices().add(seq1);
         if (la.getAmount() != 0) {
           if (la.getActionTokens().size() != 0) {
-            context.errors().warning(la, "Encountered LOOKAHEAD(...) at a non-choice location.  "
-                + "Only semantic lookahead will be considered here.");
+            context
+                .errors()
+                .warning(
+                    la,
+                    "Encountered LOOKAHEAD(...) at a non-choice location.  "
+                        + "Only semantic lookahead will be considered here.");
           } else {
-            context.errors().warning(la, "Encountered LOOKAHEAD(...) at a non-choice location.  This will be ignored.");
+            context
+                .errors()
+                .warning(
+                    la,
+                    "Encountered LOOKAHEAD(...) at a non-choice location.  This will be ignored.");
           }
         }
-        // Now we have moved the lookahead into the singleton choice. Now create
-        // a new dummy lookahead node to replace this one at its original
-        // location.
-        Lookahead la1 = new Lookahead();
+        // Now we have moved the lookahead into the singleton choice.
+        // Now create a new dummy lookahead node to replace this one at its original location.
+        final Lookahead la1 = new Lookahead();
         la1.setExplicit(false);
         la1.setLine(la.getLine());
         la1.setColumn(la.getColumn());
         la1.parent = seq;
-        // Now set the la_expansion field of la and la1 with a dummy expansion
-        // (we use EOF).
+        // Now set the la_expansion field of la and la1 with a dummy expansion (we use EOF).
         la.setLaExpansion(new REndOfFile());
         la1.setLaExpansion(new REndOfFile());
         seq.units.set(0, la1);
         seq.units.add(1, ch);
       }
     }
-
   }
 
   private static class ProductionDefinedChecker implements TreeWalkerOp {
@@ -833,12 +956,12 @@ public class Semanticize {
      *
      * @param context
      */
-    private ProductionDefinedChecker(Context context) {
+    private ProductionDefinedChecker(final Context context) {
       this.context = context;
     }
 
     @Override
-    public boolean goDeeper(Expansion e) {
+    public boolean goDeeper(final Expansion e) {
       if (e instanceof RegularExpression) {
         return false;
       } else {
@@ -847,29 +970,30 @@ public class Semanticize {
     }
 
     @Override
-    public void action(Expansion e) {
+    public void action(final Expansion e) {
       if (e instanceof NonTerminal) {
-        NonTerminal nt = (NonTerminal) e;
+        final NonTerminal nt = (NonTerminal) e;
         if (nt.setProd(context.globals().production_table.get(nt.getName())) == null) {
-          context.errors().semantic_error(e, "Non-terminal " + nt.getName() + " has not been defined.");
+          context
+              .errors()
+              .semantic_error(e, "Non-terminal " + nt.getName() + " has not been defined.");
         } else {
           nt.getProd().getParents().add(nt);
         }
       }
     }
-
   }
 
   private static class EmptyChecker implements TreeWalkerOp {
 
     private final Context context;
 
-    private EmptyChecker(Context context) {
+    private EmptyChecker(final Context context) {
       this.context = context;
     }
 
     @Override
-    public boolean goDeeper(Expansion e) {
+    public boolean goDeeper(final Expansion e) {
       if (e instanceof RegularExpression) {
         return false;
       } else {
@@ -878,18 +1002,24 @@ public class Semanticize {
     }
 
     @Override
-    public void action(Expansion e) {
+    public void action(final Expansion e) {
       if (e instanceof OneOrMore) {
         if (emptyExpansionExists(((OneOrMore) e).getExpansion())) {
-          context.errors().semantic_error(e, "Expansion within \"(...)+\" can be matched by empty string.");
+          context
+              .errors()
+              .semantic_error(e, "Expansion within \"(...)+\" can be matched by empty string.");
         }
       } else if (e instanceof ZeroOrMore) {
         if (emptyExpansionExists(((ZeroOrMore) e).getExpansion())) {
-          context.errors().semantic_error(e, "Expansion within \"(...)*\" can be matched by empty string.");
+          context
+              .errors()
+              .semantic_error(e, "Expansion within \"(...)*\" can be matched by empty string.");
         }
       } else if (e instanceof ZeroOrOne) {
         if (emptyExpansionExists(((ZeroOrOne) e).getExpansion())) {
-          context.errors().semantic_error(e, "Expansion within \"(...)?\" can be matched by empty string.");
+          context
+              .errors()
+              .semantic_error(e, "Expansion within \"(...)?\" can be matched by empty string.");
         }
       }
     }
@@ -899,12 +1029,12 @@ public class Semanticize {
 
     private final Semanticize semanticize;
 
-    private LookaheadChecker(Semanticize semanticize) {
+    private LookaheadChecker(final Semanticize semanticize) {
       this.semanticize = semanticize;
     }
 
     @Override
-    public boolean goDeeper(Expansion e) {
+    public boolean goDeeper(final Expansion e) {
       if (e instanceof RegularExpression) {
         return false;
       } else if (e instanceof Lookahead) {
@@ -915,25 +1045,25 @@ public class Semanticize {
     }
 
     @Override
-    public void action(Expansion e) {
+    public void action(final Expansion e) {
       if (e instanceof Choice) {
         if ((Options.getLookahead() == 1) || Options.getForceLaCheck()) {
           LookaheadCalc.choiceCalc((Choice) e, semanticize.getContext());
         }
       } else if (e instanceof OneOrMore) {
-        OneOrMore exp = (OneOrMore) e;
+        final OneOrMore exp = (OneOrMore) e;
         if (Options.getForceLaCheck()
             || (LookaheadChecker.implicitLA(exp.getExpansion()) && (Options.getLookahead() == 1))) {
           LookaheadCalc.ebnfCalc(exp, exp.getExpansion(), semanticize);
         }
       } else if (e instanceof ZeroOrMore) {
-        ZeroOrMore exp = (ZeroOrMore) e;
+        final ZeroOrMore exp = (ZeroOrMore) e;
         if (Options.getForceLaCheck()
             || (LookaheadChecker.implicitLA(exp.getExpansion()) && (Options.getLookahead() == 1))) {
           LookaheadCalc.ebnfCalc(exp, exp.getExpansion(), semanticize);
         }
       } else if (e instanceof ZeroOrOne) {
-        ZeroOrOne exp = (ZeroOrOne) e;
+        final ZeroOrOne exp = (ZeroOrOne) e;
         if (Options.getForceLaCheck()
             || (LookaheadChecker.implicitLA(exp.getExpansion()) && (Options.getLookahead() == 1))) {
           LookaheadCalc.ebnfCalc(exp, exp.getExpansion(), semanticize);
@@ -941,16 +1071,16 @@ public class Semanticize {
       }
     }
 
-    static boolean implicitLA(Expansion exp) {
+    static boolean implicitLA(final Expansion exp) {
       if (!(exp instanceof Sequence)) {
         return true;
       }
-      Sequence seq = (Sequence) exp;
-      Object obj = seq.units.get(0);
+      final Sequence seq = (Sequence) exp;
+      final Object obj = seq.units.get(0);
       if (!(obj instanceof Lookahead)) {
         return true;
       }
-      Lookahead la = (Lookahead) obj;
+      final Lookahead la = (Lookahead) obj;
       return !la.isExplicit();
     }
   }

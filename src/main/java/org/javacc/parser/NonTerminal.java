@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,54 +24,45 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Describes non terminals.
- */
-
+/** Describes non terminals. */
 public class NonTerminal extends Expansion {
 
   /**
-   * The LHS to which the return value of the non-terminal is assigned. In case
-   * there is no LHS, then the vector remains empty.
+   * The LHS to which the return value of the non-terminal is assigned.<br>
+   * In case there is no LHS, then the vector remains empty.
    */
-  private List<Token>      lhsTokens                 = new ArrayList<>();
+  private List<Token> lhsTokens = new ArrayList<>();
 
-  /**
-   * The name of the non-terminal.
-   */
-  private String           name;
+  /** The name of the non-terminal. */
+  private String name;
 
-  /**
-   * The list of all tokens in the argument list.
-   */
-  private List<Token>      argument_tokens           = new ArrayList<>();
+  /** The list of all tokens in the argument list. */
+  private List<Token> argument_tokens = new ArrayList<>();
 
-  private List<Token>      parametrized_type__tokens = new ArrayList<>();
-  /**
-   * The production this non-terminal corresponds to.
-   */
+  private List<Token> parametrized_type__tokens = new ArrayList<>();
+
+  /** The production this non-terminal corresponds to. */
   private NormalProduction prod;
 
   @Override
-  public StringBuffer dump(int indent, Set<Expansion> alreadyDumped) {
-    StringBuffer value = super.dump(indent, alreadyDumped).append(' ').append(name);
+  public StringBuffer dump(final int indent, final Set<Expansion> alreadyDumped) {
+    final StringBuffer value = super.dump(indent, alreadyDumped).append(' ').append(name);
     return value;
   }
 
   /**
    * @param lhsTokens the lhsTokens to set
    */
-  public void setLhsTokens(List<Token> lhsTokens) {
+  public void setLhsTokens(final List<Token> lhsTokens) {
     this.lhsTokens = lhsTokens;
   }
 
@@ -83,7 +76,7 @@ public class NonTerminal extends Expansion {
   /**
    * @param name the name to set
    */
-  public void setName(String name) {
+  public void setName(final String name) {
     this.name = name;
   }
 
@@ -97,7 +90,7 @@ public class NonTerminal extends Expansion {
   /**
    * @param argument_tokens the argument_tokens to set
    */
-  public void setParametrizedTypeTokens(List<Token> argument_tokens) {
+  public void setParametrizedTypeTokens(final List<Token> argument_tokens) {
     this.argument_tokens = argument_tokens;
   }
 
@@ -111,7 +104,7 @@ public class NonTerminal extends Expansion {
   /**
    * @param argument_tokens the argument_tokens to set
    */
-  public void setArgumentTokens(List<Token> parametrized_type__tokens) {
+  public void setArgumentTokens(final List<Token> parametrized_type__tokens) {
     this.parametrized_type__tokens = parametrized_type__tokens;
   }
 
@@ -125,7 +118,7 @@ public class NonTerminal extends Expansion {
   /**
    * @param prod the prod to set
    */
-  public final NormalProduction setProd(NormalProduction prod) {
+  public final NormalProduction setProd(final NormalProduction prod) {
     return this.prod = prod;
   }
 

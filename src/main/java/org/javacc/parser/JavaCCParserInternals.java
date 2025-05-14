@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2006, Sun Microsystems, Inc. All rights reserved.
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. * Redistributions in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. * Neither the name of the Sun Microsystems, Inc. nor
- * the names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the names of the copyright holders nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,18 +24,15 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.Hashtable;
 import java.util.List;
 
-/**
- * Utilities.
- */
+/** Utilities. */
 public abstract class JavaCCParserInternals {
 
   protected Context context;
@@ -45,7 +45,7 @@ public abstract class JavaCCParserInternals {
     System.out.println("");
   }
 
-  protected void initialize(Context context) {
+  protected void initialize(final Context context) {
     this.context = context;
     add_cu_token_here = context.globals().cu_to_insertion_point_1;
     // Integer i = Integer.valueOf(0);
@@ -57,30 +57,35 @@ public abstract class JavaCCParserInternals {
 
   protected void checkDefaultState() {
     if (!context.globals().simple_tokens_table.containsKey(LexGen.DEFAULT_STATE)) {
-      Integer i = Integer.valueOf(nextFreeLexState++);
+      final Integer i = Integer.valueOf(nextFreeLexState++);
       context.globals().lexstate_S2I.put(LexGen.DEFAULT_STATE, i);
       context.globals().lexstate_I2S.put(i, LexGen.DEFAULT_STATE);
-      context.globals().simple_tokens_table.put(LexGen.DEFAULT_STATE,
-          new Hashtable<String, Hashtable<String, RegularExpression>>());
+      context
+          .globals()
+          .simple_tokens_table
+          .put(LexGen.DEFAULT_STATE, new Hashtable<String, Hashtable<String, RegularExpression>>());
     }
   }
 
-  protected void addcuname(String id) {
+  protected void addcuname(final String id) {
     context.globals().cu_name = id;
   }
 
-  protected void compare(Token t, String id1, String id2) {
+  protected void compare(final Token t, final String id1, final String id2) {
     if (!id2.equals(id1)) {
-      context.errors().parse_error(t, "Name " + id2 + " must be the same as that used at PARSER_BEGIN (" + id1 + ")");
+      context
+          .errors()
+          .parse_error(
+              t, "Name " + id2 + " must be the same as that used at PARSER_BEGIN (" + id1 + ")");
     }
   }
 
   private List<Token> add_cu_token_here;
-  private Token       first_cu_token;
-  private boolean     insertionpoint1set = false;
-  private boolean     insertionpoint2set = false;
+  private Token first_cu_token;
+  private boolean insertionpoint1set = false;
+  private boolean insertionpoint2set = false;
 
-  protected void setinsertionpoint(Token t, int no) {
+  protected void setinsertionpoint(final Token t, final int no) {
     do {
       add_cu_token_here.add(first_cu_token);
       first_cu_token = first_cu_token.next;
@@ -99,38 +104,44 @@ public abstract class JavaCCParserInternals {
     first_cu_token = t;
   }
 
-  protected void insertionpointerrors(Token t) {
+  protected void insertionpointerrors(final Token t) {
     while (first_cu_token != t) {
       add_cu_token_here.add(first_cu_token);
       first_cu_token = first_cu_token.next;
     }
     if (!insertionpoint1set || !insertionpoint2set) {
-      context.errors().parse_error(t, "Parser class has not been defined between PARSER_BEGIN and PARSER_END.");
+      context
+          .errors()
+          .parse_error(t, "Parser class has not been defined between PARSER_BEGIN and PARSER_END.");
     }
   }
 
-  protected void set_initial_cu_token(Token t) {
+  protected void set_initial_cu_token(final Token t) {
     first_cu_token = t;
   }
 
-  protected void addproduction(NormalProduction p) {
+  protected void addproduction(final NormalProduction p) {
     context.globals().bnfproductions.add(p);
   }
 
-  protected void production_addexpansion(BNFProduction p, Expansion e) {
+  protected void production_addexpansion(final BNFProduction p, final Expansion e) {
     e.parent = p;
     p.setExpansion(e);
   }
 
   private int nextFreeLexState = 1;
 
-  protected void addregexpr(TokenProduction p) {
+  protected void addregexpr(final TokenProduction p) {
     Integer ii;
     context.globals().rexprlist.add(p);
     if (Options.getUserTokenManager()) {
       if ((p.lexStates == null) || (p.lexStates.length != 1) || !p.lexStates[0].equals("DEFAULT")) {
-        context.errors().warning(p,
-            "Ignoring lexical state specifications since option " + "USER_TOKEN_MANAGER has been set to true.");
+        context
+            .errors()
+            .warning(
+                p,
+                "Ignoring lexical state specifications since option "
+                    + "USER_TOKEN_MANAGER has been set to true.");
       }
     }
     if (p.lexStates == null) {
@@ -139,7 +150,10 @@ public abstract class JavaCCParserInternals {
     for (int i = 0; i < p.lexStates.length; i++) {
       for (int j = 0; j < i; j++) {
         if (p.lexStates[i].equals(p.lexStates[j])) {
-          context.errors().parse_error(p, "Multiple occurrence of \"" + p.lexStates[i] + "\" in lexical state list.");
+          context
+              .errors()
+              .parse_error(
+                  p, "Multiple occurrence of \"" + p.lexStates[i] + "\" in lexical state list.");
         }
       }
       if (context.globals().lexstate_S2I.get(p.lexStates[i]) == null) {
@@ -151,26 +165,30 @@ public abstract class JavaCCParserInternals {
     }
   }
 
-  protected void add_token_manager_decls(Token t, List<Token> decls) {
+  protected void add_token_manager_decls(final Token t, final List<Token> decls) {
     if (context.globals().token_mgr_decls != null) {
       context.errors().parse_error(t, "Multiple occurrence of \"TOKEN_MGR_DECLS\".");
     } else {
       context.globals().token_mgr_decls = decls;
       if (Options.getUserTokenManager()) {
-        context.errors().warning(t,
-            "Ignoring declarations in \"TOKEN_MGR_DECLS\" since option " + "USER_TOKEN_MANAGER has been set to true.");
+        context
+            .errors()
+            .warning(
+                t,
+                "Ignoring declarations in \"TOKEN_MGR_DECLS\" since option "
+                    + "USER_TOKEN_MANAGER has been set to true.");
       }
     }
   }
 
-  protected void add_inline_regexpr(RegularExpression r) {
+  protected void add_inline_regexpr(final RegularExpression r) {
     if (!(r instanceof REndOfFile)) {
-      TokenProduction p = new TokenProduction();
+      final TokenProduction p = new TokenProduction();
       p.isExplicit = false;
-      p.lexStates = new String[] { LexGen.DEFAULT_STATE };
+      p.lexStates = new String[] {LexGen.DEFAULT_STATE};
       checkDefaultState();
       p.kind = TokenProduction.TOKEN;
-      RegExprSpec res = new RegExprSpec();
+      final RegExprSpec res = new RegExprSpec();
       res.rexp = r;
       res.rexp.tpContext = p;
       res.act = new Action();
@@ -181,7 +199,7 @@ public abstract class JavaCCParserInternals {
     }
   }
 
-  private boolean hexchar(char ch) {
+  private boolean hexchar(final char ch) {
     if ((ch >= '0') && (ch <= '9')) {
       return true;
     }
@@ -194,7 +212,7 @@ public abstract class JavaCCParserInternals {
     return false;
   }
 
-  private int hexval(char ch) {
+  private int hexval(final char ch) {
     if ((ch >= '0') && (ch <= '9')) {
       return (ch) - ('0');
     }
@@ -204,7 +222,7 @@ public abstract class JavaCCParserInternals {
     return ((ch) - ('a')) + 10;
   }
 
-  protected String remove_escapes_and_quotes(Token t, String str) {
+  protected String remove_escapes_and_quotes(final Token t, final String str) {
     String retval = "";
     int index = 1;
     char ch, ch1;
@@ -296,17 +314,28 @@ public abstract class JavaCCParserInternals {
             }
           }
         }
-        context.errors().parse_error(t, "Encountered non-hex character '" + ch + "' at position " + index
-            + " of string " + "- Unicode escape must have 4 hex digits after it.");
+        context
+            .errors()
+            .parse_error(
+                t,
+                "Encountered non-hex character '"
+                    + ch
+                    + "' at position "
+                    + index
+                    + " of string "
+                    + "- Unicode escape must have 4 hex digits after it.");
         return retval;
       }
-      context.errors().parse_error(t, "Illegal escape sequence '\\" + ch + "' at position " + index + " of string.");
+      context
+          .errors()
+          .parse_error(
+              t, "Illegal escape sequence '\\" + ch + "' at position " + index + " of string.");
       return retval;
     }
     return retval;
   }
 
-  protected char character_descriptor_assign(Token t, String s) {
+  protected char character_descriptor_assign(final Token t, final String s) {
     if (s.length() != 1) {
       context.errors().parse_error(t, "String in character list may contain only one character.");
       return ' ';
@@ -315,26 +344,41 @@ public abstract class JavaCCParserInternals {
     }
   }
 
-  protected char character_descriptor_assign(Token t, String s, String left) {
+  protected char character_descriptor_assign(final Token t, final String s, final String left) {
     if (s.length() != 1) {
       context.errors().parse_error(t, "String in character list may contain only one character.");
       return ' ';
     } else if ((left.charAt(0)) > (s.charAt(0))) {
-      context.errors().parse_error(t, "Right end of character range \'" + s
-          + "\' has a lower ordinal value than the left end of character range \'" + left + "\'.");
+      context
+          .errors()
+          .parse_error(
+              t,
+              "Right end of character range \'"
+                  + s
+                  + "\' has a lower ordinal value than the left end of character range \'"
+                  + left
+                  + "\'.");
       return left.charAt(0);
     } else {
       return s.charAt(0);
     }
   }
 
-  protected void makeTryBlock(Token tryLoc, Container<TryBlock> result, Container<Expansion> nestedExp,
-      List<List<Token>> types, List<Token> ids, List<List<Token>> catchblks, List<Token> finallyblk) {
+  protected void makeTryBlock(
+      final Token tryLoc,
+      final Container<TryBlock> result,
+      final Container<Expansion> nestedExp,
+      final List<List<Token>> types,
+      final List<Token> ids,
+      final List<List<Token>> catchblks,
+      final List<Token> finallyblk) {
     if ((catchblks.size() == 0) && (finallyblk == null)) {
-      context.errors().parse_error(tryLoc, "Try block must contain at least one catch or finally block.");
+      context
+          .errors()
+          .parse_error(tryLoc, "Try block must contain at least one catch or finally block.");
       return;
     }
-    TryBlock tblk = new TryBlock();
+    final TryBlock tblk = new TryBlock();
     tblk.setLine(tryLoc.beginLine);
     tblk.setColumn(tryLoc.beginColumn);
     tblk.exp = nestedExp.member;
@@ -347,7 +391,8 @@ public abstract class JavaCCParserInternals {
   }
 
   protected final boolean isJavaLanguage() {
-    return (context.getCodeGenerator() != null) && "Java".equalsIgnoreCase(context.getCodeGenerator().getName());
+    return (context.getCodeGenerator() != null)
+        && "Java".equalsIgnoreCase(context.getCodeGenerator().getName());
   }
 
   protected final String getLanguageName() {

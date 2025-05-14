@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,10 +24,9 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
@@ -33,37 +34,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Describes expansions that are sequences of expansion units. (c1 c2 ...)
- */
-
+/** Describes expansions that are sequences of expansion units. (c1 c2 ...) */
 public class Sequence extends Expansion {
 
-  /**
-   * The list of units in this expansion sequence. Each List component will
-   * narrow to Expansion.
-   */
+  /** The list of units in this expansion sequence. Each List component will narrow to Expansion. */
   public List<Expansion> units = new ArrayList<>();
 
   public Sequence() {}
 
-  Sequence(Token token, Lookahead lookahead) {
+  Sequence(final Token token, final Lookahead lookahead) {
     setLine(token.beginLine);
     setColumn(token.beginColumn);
     units.add(lookahead);
   }
 
-
   @Override
-  public StringBuffer dump(int indent, Set<Expansion> alreadyDumped) {
+  public StringBuffer dump(final int indent, final Set<Expansion> alreadyDumped) {
     if (alreadyDumped.contains(this)) {
       return super.dump(0, alreadyDumped).insert(0, '[').append(']').insert(0, dumpPrefix(indent));
     }
 
     alreadyDumped.add(this);
     final StringBuffer sb = super.dump(indent, alreadyDumped);
-    for (Iterator<Expansion> it = units.iterator(); it.hasNext();) {
-      Expansion next = it.next();
+    for (final Iterator<Expansion> it = units.iterator(); it.hasNext(); ) {
+      final Expansion next = it.next();
       sb.append(Expansion.eol).append(next.dump(indent + 1, alreadyDumped));
     }
     return sb;

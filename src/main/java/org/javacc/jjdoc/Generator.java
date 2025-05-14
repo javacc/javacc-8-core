@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,8 +27,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-
 package org.javacc.jjdoc;
 
 import org.javacc.parser.CppCodeProduction;
@@ -43,7 +43,6 @@ import org.javacc.parser.TokenProduction;
  *
  * @author timp
  * @since 11-Dec-2006
- *
  */
 public interface Generator {
 
@@ -61,14 +60,10 @@ public interface Generator {
    */
   void print(String s);
 
-  /**
-   * Output document header.
-   */
+  /** Output document header. */
   void documentStart();
 
-  /**
-   * Output document footer.
-   */
+  /** Output document footer. */
   void documentEnd();
 
   /**
@@ -77,7 +72,6 @@ public interface Generator {
    * @param s tokens to output
    */
   void specialTokens(String s);
-
 
   void handleTokenProduction(TokenProduction tp);
 
@@ -93,24 +87,16 @@ public interface Generator {
   // */
   // void tokenEnd(TokenProduction tp);
 
-  /**
-   * Output start of non-terminal.
-   */
+  /** Output start of non-terminal. */
   void nonterminalsStart();
 
-  /**
-   * Output end of non-terminal.
-   */
+  /** Output end of non-terminal. */
   void nonterminalsEnd();
 
-  /**
-   * Output start of tokens.
-   */
+  /** Output start of tokens. */
   void tokensStart();
 
-  /**
-   * Output end of tokens.
-   */
+  /** Output end of tokens. */
   void tokensEnd();
 
   /**
@@ -165,6 +151,7 @@ public interface Generator {
   void nonTerminalStart(NonTerminal nt);
 
   void lookAheadStart(Lookahead l);
+
   void lookAheadEnd(Lookahead l);
 
   /**

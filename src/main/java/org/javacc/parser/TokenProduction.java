@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,82 +27,67 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Describes the various regular expression productions.
- */
-
+/** Describes the various regular expression productions. */
 public class TokenProduction {
 
-  /**
-   * Definitions of constants that identify the kind of regular expression
-   * production this is.
-   */
-  public static final int      TOKEN      = 0;
-  public static final int      SKIP       = 1;
-  public static final int      MORE       = 2;
-  public static final int      SPECIAL    = 3;
+  /** Definitions of constants that identify the kind of regular expression production this is. */
+  public static final int TOKEN = 0;
+
+  public static final int SKIP = 1;
+  public static final int MORE = 2;
+  public static final int SPECIAL = 3;
+
+  /** The image of the above constants. */
+  public static final String[] kindImage = {"TOKEN", "SKIP", "MORE", "SPECIAL"};
+
+  /** The starting line and column of this token production. */
+  private int column;
+
+  private int line;
 
   /**
-   * The image of the above constants.
+   * The states in which this regular expression production exists.<br>
+   * If this array is null, then "<*>" has been specified and this regular expression exists in all
+   * states. <br>
+   * However, this null value is replaced by a String array that includes all lexical state names
+   * during the semanticization phase.
    */
-  public static final String[] kindImage  = { "TOKEN", "SKIP", "MORE", "SPECIAL" };
+  public String[] lexStates;
+
+  /** The kind of this token production - TOKEN, SKIP, MORE, or SPECIAL. */
+  public int kind;
 
   /**
-   * The starting line and column of this token production.
+   * The list of regular expression specifications that comprise this production. <br>
+   * Each entry is a "RegExprSpec".
    */
-  private int                  column;
-
-  private int                  line;
-
-  /**
-   * The states in which this regular expression production exists. If this
-   * array is null, then "<*>" has been specified and this regular expression
-   * exists in all states. However, this null value is replaced by a String
-   * array that includes all lexical state names during the semanticization
-   * phase.
-   */
-  public String[]              lexStates;
+  public List<RegExprSpec> respecs = new ArrayList<>();
 
   /**
-   * The kind of this token production - TOKEN, SKIP, MORE, or SPECIAL.
+   * This is true if this corresponds to a production that actually appears in the input grammar.
+   * <br>
+   * Otherwise (if this is created to describe a regular expression that is part of the BNF) this is
+   * set to false.
    */
-  public int                   kind;
+  public boolean isExplicit = true;
 
   /**
-   * The list of regular expression specifications that comprise this
-   * production. Each entry is a "RegExprSpec".
+   * This is true if case is to be ignored within the regular expressions of this token production.
    */
-  public List<RegExprSpec>     respecs    = new ArrayList<>();
+  public boolean ignoreCase = false;
 
-  /**
-   * This is true if this corresponds to a production that actually appears in
-   * the input grammar. Otherwise (if this is created to describe a regular
-   * expression that is part of the BNF) this is set to false.
-   */
-  public boolean               isExplicit = true;
-
-  /**
-   * This is true if case is to be ignored within the regular expressions of
-   * this token production.
-   */
-  public boolean               ignoreCase = false;
-
-  /**
-   * The first and last tokens from the input stream that represent this
-   * production.
-   */
-  public Token                 firstToken, lastToken;
+  /** The first and last tokens from the input stream that represent this production. */
+  public Token firstToken, lastToken;
 
   /**
    * @param line the line to set
    */
-  public void setLine(int line) {
+  public void setLine(final int line) {
     this.line = line;
   }
 
@@ -114,7 +101,7 @@ public class TokenProduction {
   /**
    * @param column the column to set
    */
-  public void setColumn(int column) {
+  public void setColumn(final int column) {
     this.column = column;
   }
 
@@ -124,16 +111,15 @@ public class TokenProduction {
   public int getColumn() {
     return column;
   }
-  
+
   @Override
   public String toString() {
-	  StringBuffer sb = new StringBuffer();
-	  sb.append(kindImage[kind] );
-	  if (firstToken != null) {
-		  sb.append(":" );
-		  sb.append(firstToken.toString() );
-	  }
-	  return sb.toString();
+    final StringBuffer sb = new StringBuffer();
+    sb.append(kindImage[kind]);
+    if (firstToken != null) {
+      sb.append(":");
+      sb.append(firstToken.toString());
+    }
+    return sb.toString();
   }
-  
 }

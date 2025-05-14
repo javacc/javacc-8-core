@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -22,26 +24,25 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjtree;
 
 public class JJTreeNode extends SimpleNode {
 
   private int myOrdinal;
 
-  public JJTreeNode(int id) {
+  public JJTreeNode(final int id) {
     super(id);
   }
 
-  public JJTreeNode(JJTreeParser p, int i) {
+  public JJTreeNode(final JJTreeParser p, final int i) {
     this(i);
   }
 
   @Override
-  public void jjtAddChild(Node n, int i) {
+  public void jjtAddChild(final Node n, final int i) {
     super.jjtAddChild(n, i);
     ((JJTreeNode) n).setOrdinal(i);
   }
@@ -50,18 +51,15 @@ public class JJTreeNode extends SimpleNode {
     return myOrdinal;
   }
 
-  public void setOrdinal(int o) {
+  public void setOrdinal(final int o) {
     myOrdinal = o;
   }
 
-
-  /*****************************************************************
-   *
+  /*
    * The following is added manually to enhance all tree nodes with attributes
    * that store the first and last tokens corresponding to each node, as well as
    * to print the tokens back to the specified output stream.
-   *
-   *****************************************************************/
+   */
 
   private Token first, last;
 
@@ -69,7 +67,7 @@ public class JJTreeNode extends SimpleNode {
     return first;
   }
 
-  public void setFirstToken(Token t) {
+  public void setFirstToken(final Token t) {
     first = t;
   }
 
@@ -77,19 +75,19 @@ public class JJTreeNode extends SimpleNode {
     return last;
   }
 
-  public void setLastToken(Token t) {
+  public void setLastToken(final Token t) {
     last = t;
   }
 
-  public String translateImage(Token t) {
+  public String translateImage(final Token t) {
     return t.image;
   }
 
-  String whiteOut(Token t) {
-    StringBuffer sb = new StringBuffer(t.image.length());
+  String whiteOut(final Token t) {
+    final StringBuffer sb = new StringBuffer(t.image.length());
 
     for (int i = 0; i < t.image.length(); ++i) {
-      char ch = t.image.charAt(i);
+      final char ch = t.image.charAt(i);
       if ((ch != '\t') && (ch != '\n') && (ch != '\r') && (ch != '\f')) {
         sb.append(' ');
       } else {
@@ -106,7 +104,7 @@ public class JJTreeNode extends SimpleNode {
    */
   private boolean whitingOut = false;
 
-  public void print(Token t, IO io) {
+  public void print(final Token t, final IO io) {
     Token tt = t.specialToken;
     if (tt != null) {
       while (tt.specialToken != null) {
@@ -121,14 +119,12 @@ public class JJTreeNode extends SimpleNode {
     /*
      * If we're within a node scope we modify the source in the following ways:
      *
-     * 1) we rename all references to `jjtThis' to be references to the actual
-     * node variable.
+     * 1) we rename all references to `jjtThis' to be references to the actual node variable.
      *
-     * 2) we replace all calls to `jjtree.currentNode()' with references to the
-     * node variable.
+     * 2) we replace all calls to `jjtree.currentNode()' with references to the node variable.
      */
 
-    NodeScope s = NodeScope.getEnclosingNodeScope(this);
+    final NodeScope s = NodeScope.getEnclosingNodeScope(this);
     if (s == null) {
       /*
        * Not within a node scope so we don't need to modify the source.
@@ -146,8 +142,8 @@ public class JJTreeNode extends SimpleNode {
           if (t.next.next.next.image.equals("(")) {
             if (t.next.next.next.next.image.equals(")")) {
               /*
-               * Found `jjtree.currentNode()' so go into white out mode. We'll
-               * stay in this mode until we find the closing parenthesis.
+               * Found `jjtree.currentNode()' so go into white out mode.
+               * We'll stay in this mode until we find the closing parenthesis.
                */
               whitingOut = true;
             }

@@ -207,6 +207,7 @@ public class RStringLiteral extends RegularExpression {
     return Integer.MAX_VALUE;
   }
 
+  @SuppressWarnings("unchecked")
   static void GenerateNfaStartStates(final NfaState initialState, final LexerContext lexerContext) {
     final boolean[] seen = new boolean[lexerContext.generatedStates];
     final Hashtable<String, String> stateSets = new Hashtable<>();
@@ -349,18 +350,18 @@ public class RStringLiteral extends RegularExpression {
           || lexerContext.mixed[lexerContext.lexStates[kind]]) {
         continue;
       }
-      String s = lexerContext.allImages[kind];
+      String im = lexerContext.allImages[kind];
       final boolean ignoreCase = lexerContext.ignoreCase[kind];
       int actualKind = kind;
       if (lexerContext.intermediateKinds != null) {
-        final int prevKind = lexerContext.intermediateKinds[kind][s.length() - 1];
+        final int prevKind = lexerContext.intermediateKinds[kind][im.length() - 1];
         if ((prevKind != Integer.MAX_VALUE) && (prevKind < kind)) {
           // TODO add location of kind / s and label of prevKind
           lexerContext
               .context
               .errors()
               .warning(
-                  s
+                  im
                       + " cannot be matched as a string literal token."
                       + " It will be matched as the non string literal token of kind "
                       + prevKind
@@ -370,20 +371,20 @@ public class RStringLiteral extends RegularExpression {
       }
       lexerContext.kindToLexicalState.put(actualKind, lexerContext.lexStateIndex);
       if (Options.getIgnoreCase() || ignoreCase) {
-        s = s.toLowerCase();
+        im = im.toLowerCase();
       }
-      char c = s.charAt(0);
+      char c = im.charAt(0);
       int key = (lexerContext.lexStateIndex << 16) | c;
-      RStringLiteral.UpdateStringLiteralDataForKey(key, actualKind, s, lexerContext);
+      RStringLiteral.UpdateStringLiteralDataForKey(key, actualKind, im, lexerContext);
 
       if (ignoreCase) {
         lexerContext.kindToIgnoreCase.add(kind);
-        c = s.toUpperCase().charAt(0);
+        c = im.toUpperCase().charAt(0);
         key = (lexerContext.lexStateIndex << 16) | c;
-        RStringLiteral.UpdateStringLiteralDataForKey(key, actualKind, s, lexerContext);
+        RStringLiteral.UpdateStringLiteralDataForKey(key, actualKind, im, lexerContext);
       }
 
-      final int stateIndex = RStringLiteral.GetStateSetForKind(s.length() - 1, kind, lexerContext);
+      final int stateIndex = RStringLiteral.GetStateSetForKind(im.length() - 1, kind, lexerContext);
       if (stateIndex != -1) {
         lexerContext.nfaStateMap.put(actualKind, NfaState.getNfaState(stateIndex, lexerContext));
       } else {

@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,9 +27,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjdoc;
 
+import java.io.PrintWriter;
 import org.javacc.parser.CppCodeProduction;
 import org.javacc.parser.Expansion;
 import org.javacc.parser.JavaCodeProduction;
@@ -39,15 +41,13 @@ import org.javacc.parser.RJustName;
 import org.javacc.parser.RegularExpression;
 import org.javacc.parser.TokenProduction;
 
-import java.io.PrintWriter;
-
 public class BNFGenerator implements Generator {
 
   private final JJDocContext context;
   protected PrintWriter ostr;
-  private boolean       printing = true;
+  private boolean printing = true;
 
-  public BNFGenerator(JJDocContext context) {
+  public BNFGenerator(final JJDocContext context) {
     this.context = context;
   }
 
@@ -56,12 +56,12 @@ public class BNFGenerator implements Generator {
       if (JJDocGlobals.input_file.equals("standard input")) {
         return new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
       } else {
-        String ext = ".bnf";
-        int i = JJDocGlobals.input_file.lastIndexOf('.');
+        final String ext = ".bnf";
+        final int i = JJDocGlobals.input_file.lastIndexOf('.');
         if (i == -1) {
           JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
         } else {
-          String suffix = JJDocGlobals.input_file.substring(i);
+          final String suffix = JJDocGlobals.input_file.substring(i);
           if (suffix.equals(ext)) {
             JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
           } else {
@@ -74,27 +74,30 @@ public class BNFGenerator implements Generator {
     }
     try {
       ostr = new java.io.PrintWriter(new java.io.FileWriter(JJDocGlobals.output_file));
-    } catch (java.io.IOException e) {
-      error("JJDoc: can't open output stream on file " + JJDocGlobals.output_file + ".  Using standard output.");
+    } catch (final java.io.IOException e) {
+      error(
+          "JJDoc: can't open output stream on file "
+              + JJDocGlobals.output_file
+              + ".  Using standard output.");
       ostr = new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
     }
 
     return ostr;
   }
 
-  private void println(String s) {
+  private void println(final String s) {
     print(s + "\n");
   }
 
   @Override
-  public void text(String s) {
+  public void text(final String s) {
     if (printing && !((s.length() == 1) && ((s.charAt(0) == '\n') || (s.charAt(0) == '\r')))) {
       print(s);
     }
   }
 
   @Override
-  public void print(String s) {
+  public void print(final String s) {
     ostr.print(s);
   }
 
@@ -109,7 +112,7 @@ public class BNFGenerator implements Generator {
   }
 
   @Override
-  public void specialTokens(String s) {}
+  public void specialTokens(final String s) {}
 
   // public void tokenStart(TokenProduction tp) {
   // printing = false;
@@ -130,83 +133,81 @@ public class BNFGenerator implements Generator {
   public void tokensEnd() {}
 
   @Override
-  public void javacode(JavaCodeProduction jp) {}
+  public void javacode(final JavaCodeProduction jp) {}
 
   @Override
-  public void cppcode(CppCodeProduction cp) {}
+  public void cppcode(final CppCodeProduction cp) {}
 
   @Override
-  public void expansionEnd(Expansion e, boolean first) {}
+  public void expansionEnd(final Expansion e, final boolean first) {}
 
   @Override
-  public void nonTerminalStart(NonTerminal nt) {}
+  public void nonTerminalStart(final NonTerminal nt) {}
 
   @Override
-  public void nonTerminalEnd(NonTerminal nt) {}
+  public void nonTerminalEnd(final NonTerminal nt) {}
 
   @Override
-  public void productionStart(NormalProduction np) {
+  public void productionStart(final NormalProduction np) {
     println("");
     print(np.getLhs() + " ::= ");
   }
 
   @Override
-  public void productionEnd(NormalProduction np) {
+  public void productionEnd(final NormalProduction np) {
     println("");
   }
 
   @Override
-  public void expansionStart(Expansion e, boolean first) {
+  public void expansionStart(final Expansion e, final boolean first) {
     if (!first) {
       print(" | ");
     }
   }
 
   @Override
-  public void reStart(RegularExpression r) {
+  public void reStart(final RegularExpression r) {
     if (r.getClass().equals(RJustName.class) || r.getClass().equals(RCharacterList.class)) {
       printing = false;
     }
   }
 
   @Override
-  public void reEnd(RegularExpression r) {
+  public void reEnd(final RegularExpression r) {
     printing = true;
   }
 
   @Override
-  public void debug(String message) {
+  public void debug(final String message) {
     System.err.println(message);
   }
 
   @Override
-  public void info(String message) {
+  public void info(final String message) {
     System.err.println(message);
   }
 
   @Override
-  public void warn(String message) {
+  public void warn(final String message) {
     System.err.println(message);
   }
 
   @Override
-  public void error(String message) {
+  public void error(final String message) {
     System.err.println(message);
   }
 
   @Override
-  public void handleTokenProduction(TokenProduction tp) {
+  public void handleTokenProduction(final TokenProduction tp) {
     printing = false;
-    String text = JJDoc.getStandardTokenProductionText(tp, context);
+    final String text = JJDoc.getStandardTokenProductionText(tp, context);
     text(text);
     printing = true;
   }
 
   @Override
-  public void lookAheadStart(Lookahead l) {
-  }
+  public void lookAheadStart(final Lookahead l) {}
 
   @Override
-  public void lookAheadEnd(Lookahead l) {
-  }
+  public void lookAheadEnd(final Lookahead l) {}
 }

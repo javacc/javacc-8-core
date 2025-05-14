@@ -55,9 +55,9 @@ public class LexGen {
   private int maxLexStates;
 
   private NfaState[] singlesToSkip;
+  private long[] toMore;
   private long[] toSkip;
   private long[] toSpecial;
-  private long[] toMore;
   private long[] toToken;
   private int defaultLexState;
   private RegularExpression[] rexprs;
@@ -69,26 +69,26 @@ public class LexGen {
 
   public LexGen(final Context context) {
     this.context = context;
-    actions = null;
     allTpsForState = new Hashtable<>();
-    canLoop = null;
-    canReachOnMore = null;
-    defaultLexState = 0;
-    hasNfa = null;
-    initMatch = null;
-    initStates = new Hashtable<>();
-    initialState = null;
     kinds = null;
-    maxLexStates = 0;
     maxOrdinal = 1;
     newLexState = null;
-    rexprs = null;
+    actions = null;
+    initStates = new Hashtable<>();
+    totalNumStates = 0;
+    maxLexStates = 0;
     singlesToSkip = null;
     toMore = null;
     toSkip = null;
     toSpecial = null;
     toToken = null;
-    totalNumStates = 0;
+    defaultLexState = 0;
+    rexprs = null;
+    initMatch = null;
+    canLoop = null;
+    canReachOnMore = null;
+    hasNfa = null;
+    initialState = null;
   }
 
   private LexerContext BuildLexStatesTable(final boolean unicodeWarning) {
@@ -384,8 +384,7 @@ public class LexGen {
       } else {
         newLexStateIndices[i] = GetIndex(newLexState[i], tokenizerData.lexStateNames);
       }
-      // For java, we have this but for other languages, eventually we will
-      // simply have a string.
+      // For java, we have this but for other languages, eventually we will simply have a string.
       final Action act = actions[i];
       if (act == null) {
         continue;

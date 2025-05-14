@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,12 +27,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjtree;
 
-
-public class ASTBNF extends ASTProduction{
-  ASTBNF(int id) {
+public class ASTBNF extends ASTProduction {
+  ASTBNF(final int id) {
     super(id);
     throws_list.add("ParseException");
     throws_list.add("RuntimeException");
@@ -43,13 +43,9 @@ public class ASTBNF extends ASTProduction{
     return super.toString() + ": " + name;
   }
 
-  /** Accept the visitor. **/
+  /** Accept the visitor. */
   @Override
-  public Object jjtAccept(JJTreeParserVisitor visitor, Object data) {
+  public Object jjtAccept(final JJTreeParserVisitor visitor, final Object data) {
     return visitor.visit(this, data);
   }
 }
-/*
- * JavaCC - OriginalChecksum=e0c72f48f82f608478edf9776ddc8fbb (do not edit this
- * line)
- */

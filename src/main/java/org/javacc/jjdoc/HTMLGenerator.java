@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,9 +27,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.jjdoc;
 
+import java.util.Hashtable;
 import org.javacc.parser.CppCodeProduction;
 import org.javacc.parser.Expansion;
 import org.javacc.parser.JavaCodeProduction;
@@ -36,21 +38,17 @@ import org.javacc.parser.NormalProduction;
 import org.javacc.parser.RegularExpression;
 import org.javacc.parser.TokenProduction;
 
-import java.util.Hashtable;
-
-/**
- * Output BNF in HTML 3.2 format.
- */
+/** Output BNF in HTML 3.2 format. */
 public class HTMLGenerator extends TextGenerator {
 
   private final Hashtable<String, String> id_map = new Hashtable<>();
-  private int                             id     = 1;
+  private int id = 1;
 
-  public HTMLGenerator(JJDocContext context) {
+  public HTMLGenerator(final JJDocContext context) {
     super(context);
   }
 
-  protected String get_id(String nt) {
+  protected String get_id(final String nt) {
     String i = id_map.get(nt);
     if (i == null) {
       i = "prod" + id++;
@@ -59,12 +57,12 @@ public class HTMLGenerator extends TextGenerator {
     return i;
   }
 
-  private void println(String s) {
+  private void println(final String s) {
     print(s + "\n");
   }
 
   @Override
-  public void text(String s) {
+  public void text(final String s) {
     String ss = "";
     for (int i = 0; i < s.length(); ++i) {
       if (s.charAt(i) == '<') {
@@ -81,7 +79,7 @@ public class HTMLGenerator extends TextGenerator {
   }
 
   @Override
-  public void print(String s) {
+  public void print(final String s) {
     ostr.print(s);
   }
 
@@ -117,7 +115,7 @@ public class HTMLGenerator extends TextGenerator {
    * @see org.javacc.jjdoc.TextGenerator#specialTokens(java.lang.String)
    */
   @Override
-  public void specialTokens(String s) {
+  public void specialTokens(final String s) {
     println(" <!-- Special token -->");
     println(" <TR>");
     println("  <TD>");
@@ -128,20 +126,18 @@ public class HTMLGenerator extends TextGenerator {
     println(" </TR>");
   }
 
-
   @Override
-  public void handleTokenProduction(TokenProduction tp) {
+  public void handleTokenProduction(final TokenProduction tp) {
     println(" <!-- Token -->");
     println(" <TR>");
     println("  <TD>");
     println("   <PRE>");
-    String text = JJDoc.getStandardTokenProductionText(tp, context);
+    final String text = JJDoc.getStandardTokenProductionText(tp, context);
     text(text);
     println("   </PRE>");
     println("  </TD>");
     println(" </TR>");
   }
-
 
   @Override
   public void nonterminalsStart() {
@@ -170,34 +166,39 @@ public class HTMLGenerator extends TextGenerator {
   }
 
   @Override
-  public void javacode(JavaCodeProduction jp) {
+  public void javacode(final JavaCodeProduction jp) {
     productionStart(jp);
     println("<I>java code</I></TD></TR>");
     productionEnd(jp);
   }
 
   @Override
-  public void cppcode(CppCodeProduction cp) {
+  public void cppcode(final CppCodeProduction cp) {
     productionStart(cp);
     println("<I>cpp code</I></TD></TR>");
     productionEnd(cp);
   }
 
   @Override
-  public void productionStart(NormalProduction np) {
+  public void productionStart(final NormalProduction np) {
     if (!context.getOneTable()) {
       println("");
       println("<TABLE ALIGN=CENTER>");
       println("<CAPTION><STRONG>" + np.getLhs() + "</STRONG></CAPTION>");
     }
     println("<TR>");
-    println("<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME=\"" + get_id(np.getLhs()) + "\">" + np.getLhs() + "</A></TD>");
+    println(
+        "<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME=\""
+            + get_id(np.getLhs())
+            + "\">"
+            + np.getLhs()
+            + "</A></TD>");
     println("<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>");
     print("<TD ALIGN=LEFT VALIGN=BASELINE>");
   }
 
   @Override
-  public void productionEnd(NormalProduction np) {
+  public void productionEnd(final NormalProduction np) {
     if (!context.getOneTable()) {
       println("</TABLE>");
       println("<HR>");
@@ -205,7 +206,7 @@ public class HTMLGenerator extends TextGenerator {
   }
 
   @Override
-  public void expansionStart(Expansion e, boolean first) {
+  public void expansionStart(final Expansion e, final boolean first) {
     if (!first) {
       println("<TR>");
       println("<TD ALIGN=RIGHT VALIGN=BASELINE></TD>");
@@ -215,24 +216,24 @@ public class HTMLGenerator extends TextGenerator {
   }
 
   @Override
-  public void expansionEnd(Expansion e, boolean first) {
+  public void expansionEnd(final Expansion e, final boolean first) {
     println("</TD>");
     println("</TR>");
   }
 
   @Override
-  public void nonTerminalStart(NonTerminal nt) {
+  public void nonTerminalStart(final NonTerminal nt) {
     print("<A HREF=\"#" + get_id(nt.getName()) + "\">");
   }
 
   @Override
-  public void nonTerminalEnd(NonTerminal nt) {
+  public void nonTerminalEnd(final NonTerminal nt) {
     print("</A>");
   }
 
   @Override
-  public void reStart(RegularExpression r) {}
+  public void reStart(final RegularExpression r) {}
 
   @Override
-  public void reEnd(RegularExpression r) {}
+  public void reEnd(final RegularExpression r) {}
 }

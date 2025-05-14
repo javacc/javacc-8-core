@@ -1,4 +1,6 @@
-/* Copyright (c) 2006, Sun Microsystems, Inc.
+/*
+ * Copyright (c) 2020-2025, Sreeni Viswanadha <sreeni@viswanadha.net>.
+ * Copyright (c) 2024-2025, Marc Mazas <mazas.marc@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,7 +11,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Sun Microsystems, Inc. nor the names of its
+ *     * Neither the names of the copyright holders nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -25,44 +27,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.javacc.parser;
 
 import java.util.List;
 import java.util.Set;
 
-/**
- * Describes expansions of the form "try {...} ...".
- */
-
+/** Describes expansions of the form "try {...} ...". */
 public class TryBlock extends Expansion {
 
-  /**
-   * The expansion contained within the try block.
-   */
-  public Expansion         exp;
+  /** The expansion contained within the try block. */
+  public Expansion exp;
 
   /**
-   * The types of each catch block.  Each list entry is itself a
-   * list which in turn contains tokens as entries.
+   * The types of each catch block.<br>
+   * Each list entry is itself a list which in turn contains tokens as entries.
    */
   public List<List<Token>> types;
 
   /**
-   * The block part of each catch block.  Each list entry is itself a
-   * list which in turn contains tokens as entries.
+   * The block part of each catch block. <br>
+   * Each list entry is itself a list which in turn contains tokens as entries.
    */
   public List<List<Token>> catchblks;
 
   /**
-   * The block part of the finally block.  Each list entry is a token.
-   * If there is no finally block, this is null.
+   * The block part of the finally block.<br>
+   * Each list entry is a token. If there is no finally block, this is null.
    */
-  public List<Token>       finallyblk;
+  public List<Token> finallyblk;
 
   @Override
-  public StringBuffer dump(int indent, Set<Expansion> alreadyDumped) {
-    StringBuffer sb = super.dump(indent, alreadyDumped);
+  public StringBuffer dump(final int indent, final Set<Expansion> alreadyDumped) {
+    final StringBuffer sb = super.dump(indent, alreadyDumped);
     if (alreadyDumped.contains(this)) {
       return sb;
     }
@@ -70,5 +66,4 @@ public class TryBlock extends Expansion {
     sb.append(Expansion.eol).append(exp.dump(indent + 1, alreadyDumped));
     return sb;
   }
-
 }
