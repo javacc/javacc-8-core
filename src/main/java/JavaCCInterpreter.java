@@ -214,6 +214,7 @@ public class JavaCCInterpreter {
       if ((matchedPos == beg) && (matchedKind > tokenizerData.wildcardKind.get(curLexState))) {
         matchedKind = tokenizerData.wildcardKind.get(curLexState);
       }
+      if (matchedKind == Integer.MAX_VALUE) matchedKind = tokenizerData.initialMatchForLexState[curLexState];
       if (matchedKind != Integer.MAX_VALUE) {
         TokenizerData.MatchInfo matchInfo = tokenizerData.allMatches.get(matchedKind);
         if (matchInfo.action != null) {

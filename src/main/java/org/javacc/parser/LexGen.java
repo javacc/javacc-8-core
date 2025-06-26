@@ -430,6 +430,7 @@ public class LexGen {
       }
     }
     tokenizerData.setLabelsAndImages(context.globals().names_of_tokens, images);
+    tokenizerData.setInitMatch(initMatch);
 
     if (generateDataOnly) {
       return tokenizerData;

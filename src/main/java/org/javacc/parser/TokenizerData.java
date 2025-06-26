@@ -157,6 +157,9 @@ public class TokenizerData {
   /** DEFAULT lexical state index. */
   public int defaultLexState;
 
+  /** Kind for empty "" matches */
+  public int[] initialMatchForLexState;
+
   public void setParserName(final String parserName) {
     this.parserName = parserName;
   }
@@ -204,6 +207,10 @@ public class TokenizerData {
 
   public void setDefaultLexState(final int defaultLexState) {
     this.defaultLexState = defaultLexState;
+  }
+
+  public void setInitMatch(final int[] initialMatchForLexState) {
+    this.initialMatchForLexState = initialMatchForLexState;
   }
 
   /** Creates and adds a new MatchInfo in the all matches map. */
