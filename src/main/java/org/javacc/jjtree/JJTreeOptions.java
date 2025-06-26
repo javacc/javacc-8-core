@@ -54,8 +54,10 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the output directory to place the generated <code>.jj</code> files into.<br>
-   * If none is configured, use the value of <code>getOutputDirectory()</code>.<br>
+   * Find the output directory to place the JJTree generated files into (that annotated grammar, the
+   * nodes, the visitors and other helper files).<br>
+   * If none is configured, use the value of <code>getOutputDirectory()</code> (a JavaCC option,
+   * which defaults to <code>"."</code>.<br>
    * (java / gen, csharp / gen, cpp / gen).
    *
    * @return The requested JJTree output directory
@@ -79,15 +81,6 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Find the node default void value (core, -> java, csharp, cpp).
-   *
-   * @return The requested node default void value.
-   */
-  public final boolean getNodeDefaultVoid() {
-    return Options.booleanValue("NODE_DEFAULT_VOID");
-  }
-
-  /**
    * Find the node class name (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The requested node class
@@ -97,7 +90,18 @@ public class JJTreeOptions extends Options {
   }
 
   /**
-   * Compute the directory of the nodes (java / gen, cpp / gen).
+   * Find the node default void value (core, -> java, csharp, cpp).
+   *
+   * @return The requested node default void value.
+   */
+  public final boolean getNodeDefaultVoid() {
+    return Options.booleanValue("NODE_DEFAULT_VOID");
+  }
+
+  /**
+   * Find the directory of the user defined node files (not the JJTree generated node files).<br>
+   * If none is configured, use the value of <code>getJJTreeOutputDirectory()</code>.<br>
+   * (java / gen, cpp / gen).
    *
    * @return the requested node directory directory
    */

@@ -87,6 +87,7 @@ public class JJTree {
     p("JJTree accepts all JavaCC options, and inserts them into the generated file;");
     p(" it also uses the following ones:");
     p("");
+    p("    GRAMMAR_ENCODING         (default: \"\" -> the platform file.encoding)");
     p("    IGNORE_ACTIONS           (default: false)");
     p("    NAMESPACE                (default: \"\")");
     p("    OUTPUT_DIRECTORY         (default: \".\")");

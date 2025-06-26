@@ -238,11 +238,11 @@ public class Options {
   /** (core) */
   public static final String UO__UNICODE_INPUT = "UNICODE_INPUT";
 
-  /** (core, java / gen + tpl, csharp / tpl, cpp / gen + tpl) */
-  public static final String UO__USER_TOKEN_MANAGER = "USER_TOKEN_MANAGER";
-
   /** (core, java / gen + tpl) */
   public static final String UO__USER_CHAR_STREAM = "USER_CHAR_STREAM";
+
+  /** (core, java / gen + tpl, csharp / tpl, cpp / gen + tpl) */
+  public static final String UO__USER_TOKEN_MANAGER = "USER_TOKEN_MANAGER";
 
   /*
    * UOV = user option value: these are some values of options that are set by the user
@@ -509,7 +509,7 @@ public class Options {
         object = value;
       }
       final boolean isValidInteger =
-          (object instanceof Integer) && (((Integer) value).intValue() <= 0);
+          (object instanceof Integer) && (((Integer) value).intValue() < 0);
       if (isIndirectProperty || (existingValue.getClass() != object.getClass()) || isValidInteger) {
         e.warning(
             valueloc, "Bad option value \"" + value + "\" for \"" + name + "\".  Will be ignored.");
@@ -605,8 +605,9 @@ public class Options {
       } else {
         try {
           final int i = Integer.parseInt(s.substring(index + 1));
-          if (i <= 0) {
-            System.out.println("Warning: Bad option value in \"" + arg + "\".  Will be ignored.");
+          if (i < 0) {
+            System.out.println(
+                "Warning: Bad option value \"" + i + "\" in \"" + arg + "\".  Will be ignored.");
             return;
           }
           value = Integer.valueOf(i);
@@ -628,8 +629,16 @@ public class Options {
       return;
     }
     final Object valOrig = resOptions.get(name);
-    if (value.getClass() != valOrig.getClass()) {
-      System.out.println("Warning: Bad option value in \"" + arg + "\".  Will be ignored.");
+    // a string option value can be an integer like for STACK_LIMIT
+    if ((value.getClass() != valOrig.getClass()) && (valOrig.getClass() != String.class)) {
+      System.out.println(
+          "Warning: Bad option value type ("
+              + value.getClass()
+              + "/"
+              + valOrig.getClass()
+              + ") in \""
+              + arg
+              + "\".  Will be ignored.");
       return;
     }
     if (cmdLineSettings.contains(name)) {
@@ -803,15 +812,6 @@ public class Options {
     return booleanValue(UO__FORCE_LA_CHECK);
   }
 
-  //  /**
-  //   * Find the generate annotations option value.
-  //   *
-  //   * @return The generate annotations option value
-  //   */
-  //  static boolean getGenerateAnnotations() {
-  //    return booleanValue(UO__GENERATE_ANNOTATIONS);
-  //  }
-
   /**
    * Find the generate boilerplate code option value.
    *
@@ -820,33 +820,6 @@ public class Options {
   public static boolean getGenerateBoilerplateCode() {
     return booleanValue(UO__GENERATE_BOILERPLATE);
   }
-
-  //  /**
-  //   * Find the generate chained exception option value.
-  //   *
-  //   * @return The generate chained exception option value
-  //   */
-  //  public static boolean getGenerateChainedException() {
-  //    return booleanValue(UO__GENERATE_CHAINED_EXCEPTION);
-  //  }
-
-  //  /**
-  //   * Find the generate generics option value.
-  //   *
-  //   * @return The generate generics option value
-  //   */
-  //  public static boolean getGenerateGenerics() {
-  //    return booleanValue(UO__GENERATE_GENERICS);
-  //  }
-
-  //  /**
-  //   * Find the generate StringBuilder option value.
-  //   *
-  //   * @return The generate StringBuilder option value
-  //   */
-  //  static boolean getGenerateStringBuilder() {
-  //    return booleanValue(UO__GENERATE_STRING_BUILDER);
-  //  }
 
   /**
    * Find the file encoding, which will be the grammar encoding option value if set, otherwise the
