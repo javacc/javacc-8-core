@@ -822,10 +822,10 @@ public class Options {
   }
 
   /**
-   * Find the file encoding, which will be the grammar encoding option value if set, otherwise the
-   * file.encoding system property (core).
+   * Find the grammar file encoding, which will be the grammar encoding option value if set,
+   * otherwise the file.encoding system property (core).
    *
-   * @return The file encoding (e.g, UTF-8, ISO_8859-1, MacRoman)
+   * @return The file encoding (e.g, UTF-8, ISO_8859-1, MacRoman...)
    */
   public static String getGrammarEncoding() {
     final String ge = stringValue(UO__GRAMMAR_ENCODING);

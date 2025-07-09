@@ -88,7 +88,7 @@ public class Context {
         return codeGenerator;
       }
     }
-    errors().semantic_error("Could not load the CodeGenerator class: \"" + name + "\"");
+    errors().semantic_error("Could not load a CodeGenerator class handling: \"" + name + "\"");
     return codeGenerator;
   }
 
