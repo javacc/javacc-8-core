@@ -29,7 +29,6 @@
  */
 package org.javacc.parser;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -166,7 +165,7 @@ public class LexGen {
   }
 
   public TokenizerData generateTokenizerData(
-      final boolean generateDataOnly, final boolean unicodeWarning) throws IOException {
+      final boolean generateDataOnly, final boolean unicodeWarning) {
     if (!Options.getBuildTokenManager()
         || Options.getUserTokenManager()
         || (context.errors().get_error_count() > 0)) {

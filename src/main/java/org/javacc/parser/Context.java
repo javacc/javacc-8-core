@@ -76,9 +76,11 @@ public class Context {
       return codeGenerator;
     }
 
-    final String name = Options.getCodeGenerator();
+    String name = Options.getCodeGenerator();
     if (name == null) {
-      return null;
+      // default it to Java
+      //      return null;
+      name = "Java";
     }
 
     final ServiceLoader<CodeGenerator> serviceLoader = ServiceLoader.load(CodeGenerator.class);

@@ -52,6 +52,7 @@ public class JJTreeContext extends Context {
     Options.resOptions.put("NODE_SCOPE_HOOK", Boolean.FALSE);
     Options.resOptions.put("NODE_USES_PARSER", Boolean.FALSE);
     Options.resOptions.put("OUTPUT_FILE", "");
+    Options.resOptions.put("SINGLE_TREE_FILE", Boolean.TRUE);
     Options.resOptions.put("TRACK_TOKENS", Boolean.FALSE);
     Options.resOptions.put("VISITOR", Boolean.FALSE);
     Options.resOptions.put("VISITOR_DATA_TYPE", "");

@@ -35,8 +35,12 @@ public final class Main {
   protected Main() {}
 
   public static void main(final String args[]) {
+    final int errorcode = mainProgram(args);
+    System.exit(errorcode);
+  }
+
+  public static int mainProgram(final String args[]) {
     final JJTree jjtree = new JJTree();
-    final int result = jjtree.main(args);
-    System.exit(result);
+    return jjtree.main(args);
   }
 }

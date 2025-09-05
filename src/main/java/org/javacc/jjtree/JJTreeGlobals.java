@@ -65,11 +65,12 @@ public class JJTreeGlobals {
     JJTreeGlobals.jjtreeOptions.add("NODE_PREFIX");
     JJTreeGlobals.jjtreeOptions.add("NODE_SCOPE_HOOK");
     JJTreeGlobals.jjtreeOptions.add("NODE_USES_PARSER");
-    JJTreeGlobals.jjtreeOptions.add("VISITOR_DATA_TYPE_IS_POINTER");
     JJTreeGlobals.jjtreeOptions.add("OUTPUT_FILE");
+    JJTreeGlobals.jjtreeOptions.add("SINGLE_TREE_FILE");
     JJTreeGlobals.jjtreeOptions.add("TRACK_TOKENS");
     JJTreeGlobals.jjtreeOptions.add("VISITOR");
     JJTreeGlobals.jjtreeOptions.add("VISITOR_DATA_TYPE");
+    JJTreeGlobals.jjtreeOptions.add("VISITOR_DATA_TYPE_IS_POINTER");
     JJTreeGlobals.jjtreeOptions.add("VISITOR_EXCEPTION");
     JJTreeGlobals.jjtreeOptions.add("VISITOR_METHOD_NAME_INCLUDES_TYPE_NAME");
     JJTreeGlobals.jjtreeOptions.add("VISITOR_RETURN_TYPE");

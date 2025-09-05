@@ -187,6 +187,15 @@ public class JJTreeOptions extends Options {
   }
 
   /**
+   * Find the single tree file value (java / gen).
+   *
+   * @return The requested single tree file value.
+   */
+  public final boolean getSingleTreeFile() {
+    return Options.booleanValue("SINGLE_TREE_FILE");
+  }
+
+  /**
    * Find the trackTokens value (java / gen + tpl, csharp / gen + tpl, cpp / gen + tpl).
    *
    * @return The requested trackTokens value.

@@ -59,7 +59,9 @@ public final class TokenUtils {
     char ch;
     for (int i = 0; i < str.length(); i++) {
       ch = str.charAt(i);
-      if (((ch < 0x20) || (ch > 0x7e))
+      // removed converting non control characters,
+      // as e.g. a non ascii unicode character can appear in a package, type or member identifier
+      if (((ch < 0x20) /* || (ch > 0x7e) */)
           && (ch != '\t')
           && (ch != '\n')
           && (ch != '\r')
