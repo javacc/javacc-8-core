@@ -189,12 +189,22 @@ PARSER_END(JavaCCParser)
 
 TOKEN_MGR_DECLS :
 {
+  /*
+   * When one is using JJTree, JJTreeCodeGenerator adds pieces of code between in-comment tags:
+   * @bgen(jjtree) and @egen do not add spaces nor new lines before or after,
+   * @bgen-1c(jjtree) add a space before, @egen-1c adds a space after,
+   * @bgen-1l(jjtree) add a line terminator before, @egen-1l adds a line terminator after;
+   * so JavaCCParser can adjust the parsed lines/columns of the annotated .jj file to "retrieve"
+   * the corresponding lines columns in the .jjt file and display error/warning information with
+   * the lines/columns in the original .jjt grammar.
+   */
+
    int beginLine[] = new int[10];
    int beginCol[] = new int[10];
    int depth = 0;
    int size = 10;
 
-   void saveBeginLineCol(int l, int c)
+   void saveBeginLineCol(final String s, final int lo, final int co)
    {
       if (depth == size)
       {
@@ -206,15 +216,19 @@ TOKEN_MGR_DECLS :
          System.arraycopy(beginCol, 0, beginCol = tmpbeginCol, 0, depth);
       }
 
-      beginLine[depth] = l;
-      beginCol[depth] = c;
+      final int l = input_stream.getBeginLine();
+      final int c = input_stream.getBeginColumn();
+      beginLine[depth] = l - lo;
+      beginCol[depth]  = c - co;
       depth++;
    }
 
-   void restoreBeginLineCol()
+   void restoreBeginLineCol(final String s, final int lo, final int co)
    {
       depth--;
-      input_stream.adjustBeginLineColumn(beginLine[depth], beginCol[depth]);
+      final int sl = beginLine[depth];
+      final int sc = beginCol[depth];
+      input_stream.adjustBeginLineColumn(sl - lo, sc - co);
    }
 }
 
@@ -265,14 +279,46 @@ SPECIAL_TOKEN :
 | "\n"
 | "\r"
 | "\f"
-| "/*@egen*/" : AFTER_EGEN
 | "\u001a"
-
 }
 
-<AFTER_EGEN> SKIP :
+/* JJTREE CODE */
+
+MORE :
 {
-  <~[]> { restoreBeginLineCol(); input_stream.backup(1); } : DEFAULT
+  "/*@egen*/"        : AFTER_EGEN
+| "/*@egen-0l*/"     : AFTER_EGEN_0L
+| "/*@egen-1l*/\n"   : AFTER_EGEN_1L
+| "/*@egen-1l*/\r\n" : AFTER_EGEN_1L
+|
+  "/*@bgen(jjtree)"        { saveBeginLineCol("bgen   ", 0, 0); } : IN_BGEN
+| " /*@bgen-1c(jjtree)"    { saveBeginLineCol("bgen-1c", 0, 1); } : IN_BGEN
+| "\n/*@bgen-1l(jjtree)"   { saveBeginLineCol("bgen-1l", 1, 0); } : IN_BGEN
+| "\r\n/*@bgen-1l(jjtree)" { saveBeginLineCol("bgen-1l", 1, 0); } : IN_BGEN
+}
+
+<AFTER_EGEN>
+SKIP :
+{
+  < ~[] > { restoreBeginLineCol("egen   ", 1, 0); input_stream.backup(1); } : DEFAULT
+}
+
+<AFTER_EGEN_0L>
+SKIP :
+{
+  < ~[] > { restoreBeginLineCol("egen-0l", 0, 0); input_stream.backup(1); } : DEFAULT
+}
+
+<AFTER_EGEN_1L>
+SKIP :
+{
+  < ~[] > { restoreBeginLineCol("egen-1l", 1, 0); input_stream.backup(1); } : DEFAULT
+}
+
+<IN_BGEN>
+SKIP :
+{
+  "*/" : DEFAULT
 }
 
 /* COMMENTS */
@@ -281,36 +327,32 @@ MORE :
 {
   "//" : IN_SINGLE_LINE_COMMENT
 |
-  <"/**" ~["/"]>
+  < "/**" ~["/"] >
   { input_stream.backup(1); }
   : IN_FORMAL_COMMENT
 |
   "/*" : IN_MULTI_LINE_COMMENT
-|
-  "/*@bgen(jjtree"
-  { saveBeginLineCol(input_stream.getBeginLine(), input_stream.getBeginColumn()); }
-  : IN_MULTI_LINE_COMMENT
 }
 
 <IN_SINGLE_LINE_COMMENT>
 SPECIAL_TOKEN :
 {
-  <SINGLE_LINE_COMMENT : "\n" | "\r" | "\r\n" > : DEFAULT
+  < SINGLE_LINE_COMMENT : "\n" | "\r" | "\r\n" > : DEFAULT
 }
 
 <IN_FORMAL_COMMENT>
 SPECIAL_TOKEN :
 {
-  <FORMAL_COMMENT : "*/" > : DEFAULT
+  < FORMAL_COMMENT : "*/" > : DEFAULT
 }
 
 <IN_MULTI_LINE_COMMENT>
 SPECIAL_TOKEN :
 {
-  <MULTI_LINE_COMMENT : "*/" > : DEFAULT
+  < MULTI_LINE_COMMENT : "*/" > : DEFAULT
 }
 
-<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
+<IN_SINGLE_LINE_COMMENT, IN_FORMAL_COMMENT, IN_BGEN, IN_MULTI_LINE_COMMENT>
 MORE :
 {
   < ~[] >
