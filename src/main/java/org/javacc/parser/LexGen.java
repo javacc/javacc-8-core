@@ -166,6 +166,7 @@ public class LexGen {
 
   public TokenizerData generateTokenizerData(
       final boolean generateDataOnly, final boolean unicodeWarning) {
+
     if (!Options.getBuildTokenManager()
         || Options.getUserTokenManager()
         || (context.errors().get_error_count() > 0)) {
@@ -174,40 +175,31 @@ public class LexGen {
 
     final CodeGenerator codeGenerator = context.getCodeGenerator();
     final List<RegularExpression> choices = new ArrayList<>();
-    TokenProduction tp;
-    int i, j;
-
     final LexerContext lexerContext = BuildLexStatesTable(unicodeWarning);
-
     boolean ignoring = false;
 
     final TokenizerData tokenizerData = new TokenizerData();
-    tokenizerData.lexStateNames = new String[maxLexStates];
+    final String[] lexStateNames = tokenizerData.lexStateNames = new String[maxLexStates];
     for (final int l : context.globals().lexstate_I2S.keySet()) {
-      tokenizerData.lexStateNames[l] = context.globals().lexstate_I2S.get(l);
+      lexStateNames[l] = context.globals().lexstate_I2S.get(l);
     }
 
-    // while (e.hasMoreElements())
-    for (int k = 0; k < tokenizerData.lexStateNames.length; k++) {
+    for (int k = 0; k < lexStateNames.length; k++) {
       int startState = -1;
       lexerContext.clear();
-
-      // String key = (String)e.nextElement();
-      final String key = tokenizerData.lexStateNames[k];
-
-      lexerContext.lexStateIndex = GetIndex(key, tokenizerData.lexStateNames);
+      final String key = lexStateNames[k];
+      final int lexStateIndex = GetIndex(key, lexStateNames);
+      lexerContext.lexStateIndex = lexStateIndex;
       final List<TokenProduction> allTps = allTpsForState.get(key);
       initStates.put(key, initialState = new NfaState(lexerContext));
       ignoring = false;
-
-      singlesToSkip[lexerContext.lexStateIndex] = new NfaState(lexerContext);
-
+      singlesToSkip[lexStateIndex] = new NfaState(lexerContext);
       if (key.equals(LexGen.DEFAULT_STATE)) {
-        defaultLexState = lexerContext.lexStateIndex;
+        defaultLexState = lexStateIndex;
       }
 
-      for (i = 0; i < allTps.size(); i++) {
-        tp = allTps.get(i);
+      for (int i = 0; i < allTps.size(); i++) {
+        final TokenProduction tp = allTps.get(i);
         final int kind = tp.kind;
         final boolean ignore = tp.ignoreCase;
         final List<RegExprSpec> rexps = tp.respecs;
@@ -216,16 +208,16 @@ public class LexGen {
           ignoring = ignore;
         }
 
-        for (j = 0; j < rexps.size(); j++) {
+        for (int j = 0; j < rexps.size(); j++) {
           final RegExprSpec respec = rexps.get(j);
           lexerContext.curRE = respec.rexp;
-
-          rexprs[lexerContext.curKind = lexerContext.curRE.ordinal] = lexerContext.curRE;
-          lexerContext.lexStates[lexerContext.curRE.ordinal] = lexerContext.lexStateIndex;
-          lexerContext.ignoreCase[lexerContext.curRE.ordinal] = ignore;
+          final int curKind = lexerContext.curKind = lexerContext.curRE.ordinal;
+          rexprs[curKind] = lexerContext.curRE;
+          lexerContext.lexStates[curKind] = lexerContext.lexStateIndex;
+          lexerContext.ignoreCase[curKind] = ignore;
 
           if (lexerContext.curRE.private_rexp) {
-            kinds[lexerContext.curRE.ordinal] = -1;
+            kinds[curKind] = -1;
             continue;
           }
 
@@ -233,106 +225,94 @@ public class LexGen {
               && ignoring == ignore
               && (lexerContext.curRE instanceof RStringLiteral)
               && !((RStringLiteral) lexerContext.curRE).image.equals("")) {
-            ((RStringLiteral) lexerContext.curRE)
-                .GenerateDfa(lexerContext.curRE.ordinal, lexerContext);
+            ((RStringLiteral) lexerContext.curRE).GenerateDfa(curKind, lexerContext);
             if ((i != 0)
-                && !lexerContext.mixed[lexerContext.lexStateIndex]
+                && !lexerContext.mixed[lexStateIndex]
+                // how can this happen as above ignoring == ignore is true?
                 && (ignoring != ignore)) {
-              lexerContext.mixed[lexerContext.lexStateIndex] = true;
+              lexerContext.mixed[lexStateIndex] = true;
             }
           } else if (lexerContext.curRE.CanMatchAnyChar()) {
-            if ((lexerContext.canMatchAnyChar[lexerContext.lexStateIndex] == -1)
-                || (lexerContext.canMatchAnyChar[lexerContext.lexStateIndex]
-                    > lexerContext.curRE.ordinal)) {
-              lexerContext.canMatchAnyChar[lexerContext.lexStateIndex] = lexerContext.curRE.ordinal;
+            if ((lexerContext.canMatchAnyChar[lexStateIndex] == -1)
+                || (lexerContext.canMatchAnyChar[lexStateIndex] > curKind)) {
+              lexerContext.canMatchAnyChar[lexStateIndex] = curKind;
             }
           } else {
-            Nfa temp;
-
             if (lexerContext.curRE instanceof RChoice) {
               choices.add(lexerContext.curRE);
             }
-
-            temp = lexerContext.curRE.GenerateNfa(ignore, lexerContext);
-            temp.end.isFinal = true;
-            temp.end.kind = lexerContext.curRE.ordinal;
-            initialState.AddMove(temp.start);
+            final Nfa nfa = lexerContext.curRE.GenerateNfa(ignore, lexerContext);
+            nfa.end.isFinal = true;
+            nfa.end.kind = curKind;
+            initialState.AddMove(nfa.start);
           }
 
-          if (kinds.length < lexerContext.curRE.ordinal) {
-            final int[] tmp = new int[lexerContext.curRE.ordinal + 1];
-
+          if (kinds.length < curKind) {
+            final int[] tmp = new int[curKind + 1];
             System.arraycopy(kinds, 0, tmp, 0, kinds.length);
             kinds = tmp;
           }
-          // System.out.println(" ordina : " + curRE.ordinal);
-
-          kinds[lexerContext.curRE.ordinal] = kind;
+          kinds[curKind] = kind;
 
           if ((respec.nextState != null)
-              && !respec.nextState.equals(
-                  tokenizerData.lexStateNames[lexerContext.lexStateIndex])) {
-            newLexState[lexerContext.curRE.ordinal] = respec.nextState;
+              && !respec.nextState.equals(lexStateNames[lexStateIndex])) {
+            newLexState[curKind] = respec.nextState;
           }
 
           if ((respec.act != null)
               && (respec.act.getActionTokens() != null)
               && (respec.act.getActionTokens().size() > 0)) {
-            actions[lexerContext.curRE.ordinal] = respec.act;
+            actions[curKind] = respec.act;
           }
 
           switch (kind) {
             case TokenProduction.SPECIAL:
-              toSpecial[lexerContext.curRE.ordinal / 64] |= 1L << (lexerContext.curRE.ordinal % 64);
-              toSkip[lexerContext.curRE.ordinal / 64] |= 1L << (lexerContext.curRE.ordinal % 64);
+              toSpecial[curKind / 64] |= 1L << (curKind % 64);
+              toSkip[curKind / 64] |= 1L << (curKind % 64);
               break;
             case TokenProduction.SKIP:
-              toSkip[lexerContext.curRE.ordinal / 64] |= 1L << (lexerContext.curRE.ordinal % 64);
+              toSkip[curKind / 64] |= 1L << (curKind % 64);
               break;
             case TokenProduction.MORE:
-              toMore[lexerContext.curRE.ordinal / 64] |= 1L << (lexerContext.curRE.ordinal % 64);
-
-              if (newLexState[lexerContext.curRE.ordinal] != null) {
-                canReachOnMore[
-                        GetIndex(
-                            newLexState[lexerContext.curRE.ordinal], tokenizerData.lexStateNames)] =
-                    true;
+              toMore[curKind / 64] |= 1L << (curKind % 64);
+              if (newLexState[curKind] != null) {
+                canReachOnMore[GetIndex(newLexState[curKind], lexStateNames)] = true;
               } else {
-                canReachOnMore[lexerContext.lexStateIndex] = true;
+                canReachOnMore[lexStateIndex] = true;
               }
-
               break;
             case TokenProduction.TOKEN:
-              toToken[lexerContext.curRE.ordinal / 64] |= 1L << (lexerContext.curRE.ordinal % 64);
+              toToken[curKind / 64] |= 1L << (curKind % 64);
               break;
-          }
-        }
-      }
+          } // end          switch (kind)
+          //
+        } // end        for (int j = 0; j < rexps.size(); j++)
+        //
+      } // end      for (int i = 0; i < allTps.size(); i++) {
 
       // Generate a static block for initializing the nfa transitions
       NfaState.ComputeClosures(lexerContext);
 
-      for (i = 0; i < initialState.epsilonMoves.size(); i++) {
+      for (int i = 0; i < initialState.epsilonMoves.size(); i++) {
         initialState.epsilonMoves.elementAt(i).GenerateCode();
       }
 
-      if (hasNfa[lexerContext.lexStateIndex] = (lexerContext.generatedStates != 0)) {
+      if (hasNfa[lexStateIndex] = (lexerContext.generatedStates != 0)) {
         initialState.GenerateCode();
         startState = initialState.GenerateInitMoves();
       }
 
       if ((initialState.kind != Integer.MAX_VALUE) && (initialState.kind != 0)) {
-        if ((initMatch[lexerContext.lexStateIndex] == 0)
-            || (initMatch[lexerContext.lexStateIndex] > initialState.kind)) {
-          initMatch[lexerContext.lexStateIndex] = initialState.kind;
+        if ((initMatch[lexStateIndex] == 0) || (initMatch[lexStateIndex] > initialState.kind)) {
+          initMatch[lexStateIndex] = initialState.kind;
         }
-      } else if (initMatch[lexerContext.lexStateIndex] == 0) {
-        initMatch[lexerContext.lexStateIndex] = Integer.MAX_VALUE;
+      } else if (initMatch[lexStateIndex] == 0) {
+        initMatch[lexStateIndex] = Integer.MAX_VALUE;
       }
 
       RStringLiteral.FillSubString(lexerContext);
 
-      if (hasNfa[lexerContext.lexStateIndex] && !lexerContext.mixed[lexerContext.lexStateIndex]) {
+      if (hasNfa[lexStateIndex] && !lexerContext.mixed[lexStateIndex]) {
         RStringLiteral.GenerateNfaStartStates(initialState, lexerContext);
       }
 
@@ -340,14 +320,15 @@ public class LexGen {
       NfaState.UpdateNfaData(
           totalNumStates,
           startState,
-          lexerContext.lexStateIndex,
-          lexerContext.canMatchAnyChar[lexerContext.lexStateIndex],
+          lexStateIndex,
+          lexerContext.canMatchAnyChar[lexStateIndex],
           lexerContext);
       assert (lexerContext.generatedStates == lexerContext.statesForLexicalState.get(k).size());
       totalNumStates += lexerContext.generatedStates;
-    }
+      //
+    } // end    for (int k = 0; k < lexStateNames.length; k++)
 
-    for (i = 0; i < choices.size(); i++) {
+    for (int i = 0; i < choices.size(); i++) {
       ((RChoice) choices.get(i)).CheckUnmatchability(lexerContext.lexStates, lexerContext.context);
     }
 
@@ -358,44 +339,45 @@ public class LexGen {
     RStringLiteral.BuildTokenizerData(tokenizerData, lexerContext);
 
     final int[] newLexStateIndices = new int[maxOrdinal];
-    final StringBuilder tokenMgrDecls = new StringBuilder();
-    if ((context.globals().token_mgr_decls != null)
-        && (context.globals().token_mgr_decls.size() > 0)) {
-      for (final Token token : context.globals().token_mgr_decls) {
+    final List<Token> decls = context.globals().token_mgr_decls;
+    final StringBuilder tmDeclsSb = new StringBuilder(decls == null ? 0 : 8 * decls.size());
+    if ((decls != null) && (decls.size() > 0)) {
+      for (final Token token : decls) {
         if (token.specialToken != null) {
           Token t = token;
           while (t.specialToken != null) {
             t = t.specialToken;
           }
           while (t != null) {
-            tokenMgrDecls.append(t.image);
+            tmDeclsSb.append(t.image);
             t = t.next;
           }
         }
-        tokenMgrDecls.append(token.image);
+        tmDeclsSb.append(token.image);
       }
     }
-    tokenizerData.setDecls(tokenMgrDecls.toString());
+    tokenizerData.setDecls(tmDeclsSb.toString());
     final Map<Integer, String> actionStrings = new HashMap<>();
-    for (i = 0; i < maxOrdinal; i++) {
+    for (int i = 0; i < maxOrdinal; i++) {
       if (newLexState[i] == null) {
         newLexStateIndices[i] = -1;
       } else {
-        newLexStateIndices[i] = GetIndex(newLexState[i], tokenizerData.lexStateNames);
+        newLexStateIndices[i] = GetIndex(newLexState[i], lexStateNames);
       }
       // For java, we have this but for other languages, eventually we will simply have a string.
       final Action act = actions[i];
       if (act == null) {
         continue;
       }
-      final StringBuilder sb = new StringBuilder();
-      for (int k = 0; k < act.getActionTokens().size(); k++) {
-        if (act.getActionTokens().get(k).specialToken != null) {
-          sb.append(act.getActionTokens().get(k).specialToken.image);
+      final List<Token> actionTokens = act.getActionTokens();
+      final StringBuilder actionSb = new StringBuilder(8 * actionTokens.size());
+      for (final Token actionTk : actionTokens) {
+        if (actionTk.specialToken != null) {
+          actionSb.append(actionTk.specialToken.image);
         }
-        sb.append(act.getActionTokens().get(k).image);
+        actionSb.append(actionTk.image);
       }
-      actionStrings.put(i, sb.toString());
+      actionStrings.put(i, actionSb.toString());
     }
     tokenizerData.setDefaultLexState(defaultLexState);
     tokenizerData.updateMatchInfo(
@@ -407,9 +389,10 @@ public class LexGen {
         toToken,
         lexerContext.allImages);
     final Map<Integer, String> labels = new HashMap<>();
-    final String[] images = new String[context.globals().rexps_of_tokens.size() + 1];
-    for (final Integer o : context.globals().rexps_of_tokens.keySet()) {
-      final RegularExpression re = context.globals().rexps_of_tokens.get(o);
+    final Map<Integer, RegularExpression> rexps_of_tokens = context.globals().rexps_of_tokens;
+    final String[] images = new String[rexps_of_tokens.size() + 1];
+    for (final Integer o : rexps_of_tokens.keySet()) {
+      final RegularExpression re = rexps_of_tokens.get(o);
       final String label = re.label;
       if ((label != null) && (label.length() > 0)) {
         labels.put(o, label);
