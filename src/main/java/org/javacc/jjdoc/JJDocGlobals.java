@@ -29,72 +29,9 @@
  */
 package org.javacc.jjdoc;
 
-/** Global variables for JJDoc. */
-public class JJDocGlobals {
-
-  /** The name of the input file. */
-  public static String input_file;
-
-  /** The name of the output file. */
-  public static String output_file;
-
-  /** The Generator to create output with. */
-  public static Generator generator;
-
-  /**
-   * The commandline option is either TEXT or not, but the generator might have been set to some
-   * other Generator using the setGenerator method.
-   *
-   * @return the generator configured in options or set by setter.
-   */
-  public static Generator getGenerator(final JJDocContext context) {
-    if (JJDocGlobals.generator == null) {
-      if (context.getText()) {
-        JJDocGlobals.generator = new TextGenerator(context);
-      } else if (context.getBNF()) {
-        JJDocGlobals.generator = new BNFGenerator(context);
-      } else if (context.getXText()) {
-        JJDocGlobals.generator = new XTextGenerator(context);
-      } else if (context.getJCC()) {
-        JJDocGlobals.generator = new JCCGenerator(context);
-      } else {
-        JJDocGlobals.generator = new HTMLGenerator(context);
-      }
-    } else {
-      if (context.getText()) {
-        if (JJDocGlobals.generator instanceof HTMLGenerator) {
-          JJDocGlobals.generator = new TextGenerator(context);
-        }
-      } else if (context.getBNF()) {
-        JJDocGlobals.generator = new BNFGenerator(context);
-      } else if (context.getXText()) {
-        JJDocGlobals.generator = new XTextGenerator(context);
-      } else if (context.getJCC()) {
-        JJDocGlobals.generator = new JCCGenerator(context);
-      } else {
-        if (JJDocGlobals.generator instanceof TextGenerator) {
-          JJDocGlobals.generator = new HTMLGenerator(context);
-        }
-      }
-    }
-    return JJDocGlobals.generator;
-  }
-
-  /**
-   * Log informational messages.
-   *
-   * @param message the message to log
-   */
-  public static void info(final JJDocContext context, final String message) {
-    JJDocGlobals.getGenerator(context).info(message);
-  }
-
-  /**
-   * Log error messages.
-   *
-   * @param message the message to log
-   */
-  public static void error(final JJDocContext context, final String message) {
-    JJDocGlobals.getGenerator(context).error(message);
-  }
+/**
+ * Global variables for the JJDoc tool. TODO put them inside JJDoc.
+ */
+class JJDocGlobals {
+  
 }

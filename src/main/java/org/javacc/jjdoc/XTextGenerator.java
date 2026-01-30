@@ -39,204 +39,123 @@ import org.javacc.parser.RegExprSpec;
 import org.javacc.parser.RegularExpression;
 import org.javacc.parser.TokenProduction;
 
-/** Output BNF in HTML 3.2 format. */
+/**
+ * Generator for the BNF representation of the grammar in the Eclipse XText format.
+ */
 public class XTextGenerator extends TextGenerator {
-
-  public XTextGenerator(final JJDocContext context) {
-    super(context);
+  
+  /**
+   * Constructor with parameters.
+   * 
+   * @param context - the JJDoc context
+   * @param jjdoc - the JJDoc tool
+   */
+  XTextGenerator(final JJDocContext context, final JJDoc jjdoc) {
+    super(context, jjdoc);
   }
-
+  
   @Override
-  public void handleTokenProduction(final TokenProduction tp) {
-
-    final StringBuilder sb = new StringBuilder();
-
-    for (final Iterator<RegExprSpec> it2 = tp.respecs.iterator(); it2.hasNext(); ) {
+  public void handleTokenProduction(final String text, final TokenProduction tp) {
+    
+    final StringBuilder sb = new StringBuilder(64);
+    
+    for (final Iterator<RegExprSpec> it2 = tp.respecs.iterator(); it2.hasNext();) {
       final RegExprSpec res = it2.next();
-
-      final String regularExpressionText = JJDoc.emitRE(res.rexp, context);
+      
+      final String regularExpressionText = jjdoc.emitRE(res.rexp, context);
       sb.append(regularExpressionText);
-
+      
       if (res.nsTok != null) {
         sb.append(" : " + res.nsTok.image);
       }
-
+      
       sb.append("\n");
-      // if (it2.hasNext()) {
-      // sb.append("| ");
-      // }
     }
-
-    // text(sb.toString());
+    
   }
-
-  private void println(final String s) {
+  
+  /**
+   * Outputs a string with an end of line.
+   * 
+   * @param s - a string
+   */
+  void println(final String s) {
     print(s + "\n");
   }
-
+  
   @Override
   public void text(final String s) {
-    // String ss = "";
-    // for (int i = 0; i < s.length(); ++i) {
-    // if (s.charAt(i) == '<') {
-    // ss += "&lt;";
-    // } else if (s.charAt(i) == '>') {
-    // ss += "&gt;";
-    // } else if (s.charAt(i) == '&') {
-    // ss += "&amp;";
-    // } else {
-    // ss += s.charAt(i);
-    // }
-    // }
     print(s);
   }
-
+  
   @Override
   public void print(final String s) {
     ostr.print(s);
   }
-
+  
   @Override
   public void documentStart() {
     ostr = create_output_stream();
-    println("grammar " + JJDocGlobals.input_file + " with org.eclipse.xtext.common.Terminals");
+    println("grammar " + jjdoc.input_file + " with org.eclipse.xtext.common.Terminals");
     println("import \"http://www.eclipse.org/emf/2002/Ecore\" as ecore");
     println("");
-    //
-    //
-    // println("<HTML>");
-    // println("<HEAD>");
-    // if (!"".equals(JJDocOptions.getCSS())) {
-    // println("<LINK REL=\"stylesheet\" type=\"text/css\" href=\"" +
-    // JJDocOptions.getCSS() + "\"/>");
-    // }
-    // if (JJDocGlobals.input_file != null) {
-    // println("<TITLE>BNF for " + JJDocGlobals.input_file + "</TITLE>");
-    // } else {
-    // println("<TITLE>A BNF grammar by JJDoc</TITLE>");
-    // }
-    // println("</HEAD>");
-    // println("<BODY>");
-    // println("<H1 ALIGN=CENTER>BNF for " + JJDocGlobals.input_file + "</H1>");
   }
-
+  
   @Override
   public void documentEnd() {
-    // println("</BODY>");
-    // println("</HTML>");
     ostr.close();
   }
-
-  /**
-   * Prints out comments, used for tokens and non-terminals. {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.TextGenerator#specialTokens(java.lang.String)
-   */
+  
   @Override
   public void specialTokens(final String s) {
-    // println(" <!-- Special token -->");
-    // println(" <TR>");
-    // println(" <TD>");
-    // println("<PRE>");
     print(s);
-    // println("</PRE>");
-    // println(" </TD>");
-    // println(" </TR>");
   }
-
+  
   @Override
-  public void nonterminalsStart() {
-    // println("<H2 ALIGN=CENTER>NON-TERMINALS</H2>");
-    // if (JJDocOptions.getOneTable()) {
-    // println("<TABLE>");
-    // }
-  }
-
+  public void nonterminalsStart() {}
+  
   @Override
-  public void nonterminalsEnd() {
-    // if (JJDocOptions.getOneTable()) {
-    // println("</TABLE>");
-    // }
-  }
-
+  public void nonterminalsEnd() {}
+  
   @Override
-  public void tokensStart() {
-    // println("<H2 ALIGN=CENTER>TOKENS</H2>");
-    // println("<TABLE>");
-  }
-
+  public void tokensStart() {}
+  
   @Override
-  public void tokensEnd() {
-    // println("</TABLE>");
-  }
-
+  public void tokensEnd() {}
+  
   @Override
-  public void javacode(final JavaCodeProduction jp) {
-    // productionStart(jp);
-    // println("<I>java code</I></TD></TR>");
-    // productionEnd(jp);
-  }
-
+  public void javacode(final JavaCodeProduction jp) {}
+  
   @Override
-  public void cppcode(final CppCodeProduction cp) {
-    // productionStart(cp);
-    // println("<I>c++ code</I></TD></TR>");
-    // productionEnd(cp);
-  }
-
+  public void cppcode(final CppCodeProduction cp) {}
+  
   @Override
-  public void productionStart(final NormalProduction np) {
-    // if (!JJDocOptions.getOneTable()) {
-    // println("");
-    // println("<TABLE ALIGN=CENTER>");
-    // println("<CAPTION><STRONG>" + np.getLhs() + "</STRONG></CAPTION>");
-    // }
-    // println("<TR>");
-    // println("<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME=\"" +
-    // get_id(np.getLhs()) + "\">" + np.getLhs() + "</A></TD>");
-    // println("<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>");
-    // print("<TD ALIGN=LEFT VALIGN=BASELINE>");
-  }
-
+  public void productionStart(final NormalProduction np) {}
+  
   @Override
-  public void productionEnd(final NormalProduction np) {
-    // if (!JJDocOptions.getOneTable()) {
-    // println("</TABLE>");
-    // println("<HR>");
-    // }
-  }
-
+  public void productionEnd(final NormalProduction np) {}
+  
   @Override
-  public void expansionStart(final Expansion e, final boolean first) {
-    //
-    //
-    //
-    // if (!first) {
-    // println("<TR>");
-    // println("<TD ALIGN=RIGHT VALIGN=BASELINE></TD>");
-    // println("<TD ALIGN=CENTER VALIGN=BASELINE>|</TD>");
-    // print("<TD ALIGN=LEFT VALIGN=BASELINE>");
-    // }
-  }
-
+  public void expansionStart(final Expansion e, final boolean first) {}
+  
   @Override
   public void expansionEnd(final Expansion e, final boolean first) {
     println(";");
   }
-
+  
   @Override
   public void nonTerminalStart(final NonTerminal nt) {
     print("terminal ");
   }
-
+  
   @Override
   public void nonTerminalEnd(final NonTerminal nt) {
     print(";");
   }
-
+  
   @Override
   public void reStart(final RegularExpression r) {}
-
+  
   @Override
   public void reEnd(final RegularExpression r) {}
 }

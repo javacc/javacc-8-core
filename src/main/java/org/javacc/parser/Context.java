@@ -33,20 +33,32 @@ import java.io.File;
 import java.util.ServiceLoader;
 
 /**
- * The JavaCC context holds the objects & methods for the code generation process (options, globals,
- * errors & codeGenerator).
+ * The JavaCC context holds the objects & methods for the code generation process .
  */
 public class Context {
-
+  
+  /** The options. */
   private final Options options;
+  
+  /** The globals. */
   private final JavaCCGlobals globals;
+  
+  /** The errors. */
   private final JavaCCErrors errors;
+  
+  /** The code generator. */
   private CodeGenerator codeGenerator = null;
-
+  
+  /** Standard constructor (creates a new Options instance). */
   public Context() {
     this(new Options());
   }
-
+  
+  /**
+   * Constructor.
+   * 
+   * @param options - an Options instance.
+   */
   public Context(final Options options) {
     this.options = options;
     this.errors = new JavaCCErrors();
@@ -54,35 +66,33 @@ public class Context {
     this.codeGenerator = null;
     Options.init();
   }
-
-  /** Get the {@link Options} instance. */
+  
+  /** @return the options instance. */
   public final Options options() {
     return options;
   }
-
-  /** Get the {@link JavaCCGlobals} instance. */
+  
+  /** @return the globals instance. */
   public final JavaCCGlobals globals() {
     return globals;
   }
-
-  /** Get the {@link JavaCCErrors} instance. */
+  
+  /** @return the errors instance. */
   public final JavaCCErrors errors() {
     return errors;
   }
-
-  /** Get the {@link CodeGenerator} instance. */
+  
+  /** @return the code generator instance. */
   public final CodeGenerator getCodeGenerator() {
     if (codeGenerator != null) {
       return codeGenerator;
     }
-
+    
     String name = Options.getCodeGenerator();
     if (name == null) {
-      // default it to Java
-      //      return null;
       name = "Java";
     }
-
+    
     final ServiceLoader<CodeGenerator> serviceLoader = ServiceLoader.load(CodeGenerator.class);
     for (final CodeGenerator generator : serviceLoader) {
       if (generator.getName().equalsIgnoreCase(name)) {
@@ -90,10 +100,11 @@ public class Context {
         return codeGenerator;
       }
     }
-    errors().semantic_error("Could not load a CodeGenerator class handling: \"" + name + "\"");
+    errors().semantic_error("Could not load a CodeGenerator class handling: \"" + name
+        + "\": check there is a corresponding jar in the classpath.");
     return codeGenerator;
   }
-
+  
   /**
    * Create and checks the output directory.
    *
@@ -101,24 +112,22 @@ public class Context {
    */
   public final void createOutputDir(final File outputDir) {
     if (!outputDir.exists()) {
-      errors()
-          .warning(
-              "Output directory \"" + outputDir + "\" does not exist. Creating the directory.");
-
+      errors().warning(
+          "Output directory \"" + outputDir + "\" does not exist. Creating the directory.");
+      
       if (!outputDir.mkdirs()) {
-        errors().semantic_error("Cannot create the output directory : " + outputDir);
+        errors().semantic_error("Cannot create the output directory \"" + outputDir + "\".");
         return;
       }
     }
-
+    
     if (!outputDir.isDirectory()) {
       errors().semantic_error("\"" + outputDir + " is not a valid output directory.");
       return;
     }
-
+    
     if (!outputDir.canWrite()) {
-      errors()
-          .semantic_error("Cannot write to the output output directory : \"" + outputDir + "\"");
+      errors().semantic_error("Cannot write to the output directory \"" + outputDir + "\"");
       return;
     }
   }

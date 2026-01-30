@@ -29,6 +29,10 @@
  */
 package org.javacc.jjdoc;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import org.javacc.parser.CppCodeProduction;
 import org.javacc.parser.Expansion;
@@ -39,295 +43,212 @@ import org.javacc.parser.NormalProduction;
 import org.javacc.parser.RegularExpression;
 import org.javacc.parser.TokenProduction;
 
-/** Output BNF in text format. */
+/**
+ * Generator for the BNF representation of the grammar in the text(ual) format.
+ */
 public class TextGenerator implements Generator {
-
-  protected final JJDocContext context;
-  protected PrintWriter ostr;
-
-  public TextGenerator(final JJDocContext context) {
-    this.context = context;
-  }
-
+  
+  /** The JJDoc context. */
+  JJDocContext context;
+  
+  /** The JJDoc tool. */
+  JJDoc jjdoc;
+  
+  /** The print writer. */
+  PrintWriter ostr;
+  
   /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#text(java.lang.String)
+   * Constructor with parameters.
+   * 
+   * @param context - the JJDoc context
+   * @param jjdoc - the JJDoc tool
    */
+  TextGenerator(final JJDocContext context, final JJDoc jjdoc) {
+    this.context = context;
+    this.jjdoc = jjdoc;
+  }
+  
+  /**
+   * Create an output stream for the generated Jack code. Try to open a file based on the name of
+   * the parser, but if that fails use the standard output stream.
+   * 
+   * @return a print writer
+   */
+  PrintWriter create_output_stream() {
+    if (context.getOutputFile().equals("")) {
+      
+      if (jjdoc.input_file.equals("standard input")) {
+        ostr = new PrintWriter(new OutputStreamWriter(System.out));
+        return ostr;
+      }
+      
+      String ext = ".html";
+      if (context.getText()) {
+        ext = ".txt";
+      } else if (context.getXText()) {
+        ext = ".xtext";
+      }
+      final int i = jjdoc.input_file.lastIndexOf('.');
+      if (i == -1) {
+        jjdoc.output_file_path = jjdoc.input_file + ext;
+      } else {
+        final String suffix = jjdoc.input_file.substring(i);
+        if (suffix.equals(ext)) {
+          jjdoc.output_file_path = jjdoc.input_file + ext;
+        } else {
+          jjdoc.output_file_path = jjdoc.input_file.substring(0, i) + ext;
+        }
+      }
+      final String od = context.getOutputDirectory();
+      if (!od.equals("")) {
+        final File odFile = new File(od);
+        if (!odFile.exists()) {
+          odFile.mkdirs();
+        }
+        jjdoc.output_file_path = od + File.separator + jjdoc.output_file_path;
+      } else {
+        jjdoc.output_file_path = jjdoc.input_directory + File.separator + jjdoc.output_file_path;
+      }
+      
+    } else {
+      
+      jjdoc.output_file_path = context.getOutputFile();
+      final File ofpFile = new File(jjdoc.output_file_path).getParentFile();
+      if (!ofpFile.exists()) {
+        ofpFile.mkdirs();
+      }
+      
+    }
+    
+    try {
+      ostr = new PrintWriter(new FileWriter(jjdoc.output_file_path));
+    }
+    catch (final IOException e) {
+      error("JJDoc: can't open output stream on file " + jjdoc.output_file_path
+          + ".  Using standard output.");
+      ostr = new PrintWriter(new OutputStreamWriter(System.out));
+    }
+    
+    return ostr;
+  }
+  
   @Override
   public void text(final String s) {
     print(s);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#print(java.lang.String)
-   */
+  
   @Override
   public void print(final String s) {
     ostr.print(s);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#documentStart()
-   */
+  
   @Override
   public void documentStart() {
     ostr = create_output_stream();
     ostr.print("\nDOCUMENT START\n");
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#documentEnd()
-   */
+  
   @Override
   public void documentEnd() {
     ostr.print("\nDOCUMENT END\n");
     ostr.close();
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#specialTokens(java.lang.String)
-   */
+  
   @Override
   public void specialTokens(final String s) {
     ostr.print(s);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#nonterminalsStart()
-   */
+  
   @Override
   public void nonterminalsStart() {
     text("NON-TERMINALS\n");
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#nonterminalsEnd()
-   */
+  
   @Override
   public void nonterminalsEnd() {}
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#tokensStart()
-   */
+  
   @Override
   public void tokensStart() {
     text("TOKENS\n");
   }
-
+  
   @Override
-  public void handleTokenProduction(final TokenProduction tp) {
-    final String text = JJDoc.getStandardTokenProductionText(tp, context);
+  public void handleTokenProduction(final String text, final TokenProduction tp) {
     text(text);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#tokensEnd()
-   */
+  
   @Override
   public void tokensEnd() {}
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#javacode(org.javacc.parser.JavaCodeProduction)
-   */
+  
   @Override
   public void javacode(final JavaCodeProduction jp) {
     productionStart(jp);
     text("java code");
     productionEnd(jp);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#cppcode(org.javacc.parser.CppCodeProduction)
-   */
+  
   @Override
   public void cppcode(final CppCodeProduction cp) {
     productionStart(cp);
     text("c++ code");
     productionEnd(cp);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#productionStart(org.javacc.parser.NormalProduction)
-   */
+  
   @Override
   public void productionStart(final NormalProduction np) {
     ostr.print("\t" + np.getLhs() + "\t:=\t");
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#productionEnd(org.javacc.parser.NormalProduction)
-   */
+  
   @Override
   public void productionEnd(final NormalProduction np) {
     ostr.print("\n");
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#expansionStart(org.javacc.parser.Expansion, boolean)
-   */
+  
   @Override
   public void expansionStart(final Expansion e, final boolean first) {
     if (!first) {
       ostr.print("\n\t\t|\t");
     }
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#expansionEnd(org.javacc.parser.Expansion, boolean)
-   */
+  
   @Override
   public void expansionEnd(final Expansion e, final boolean first) {}
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#nonTerminalStart(org.javacc.parser.NonTerminal)
-   */
+  
   @Override
   public void nonTerminalStart(final NonTerminal nt) {}
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#nonTerminalEnd(org.javacc.parser.NonTerminal)
-   */
+  
   @Override
   public void nonTerminalEnd(final NonTerminal nt) {}
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#reStart(org.javacc.parser.RegularExpression)
-   */
+  
   @Override
   public void reStart(final RegularExpression r) {}
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#reEnd(org.javacc.parser.RegularExpression)
-   */
+  
   @Override
   public void reEnd(final RegularExpression r) {}
-
-  /**
-   * Create an output stream for the generated Jack code. Try to open a file based on the name of
-   * the parser, but if that fails use the standard output stream.
-   */
-  protected PrintWriter create_output_stream() {
-    if (context.getOutputFile().equals("")) {
-      if (JJDocGlobals.input_file.equals("standard input")) {
-        return new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
-      } else {
-        String ext = ".html";
-
-        if (context.getText()) {
-          ext = ".txt";
-        } else if (context.getXText()) {
-          ext = ".xtext";
-        }
-
-        final int i = JJDocGlobals.input_file.lastIndexOf('.');
-        if (i == -1) {
-          JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
-        } else {
-          final String suffix = JJDocGlobals.input_file.substring(i);
-          if (suffix.equals(ext)) {
-            JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
-          } else {
-            JJDocGlobals.output_file = JJDocGlobals.input_file.substring(0, i) + ext;
-          }
-        }
-      }
-    } else {
-      JJDocGlobals.output_file = context.getOutputFile();
-    }
-
-    try {
-      ostr = new java.io.PrintWriter(new java.io.FileWriter(JJDocGlobals.output_file));
-    } catch (final java.io.IOException e) {
-      error(
-          "JJDoc: can't open output stream on file "
-              + JJDocGlobals.output_file
-              + ".  Using standard output.");
-      ostr = new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
-    }
-
-    return ostr;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#debug(java.lang.String)
-   */
+  
   @Override
   public void debug(final String message) {
     System.err.println(message);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#info(java.lang.String)
-   */
+  
   @Override
   public void info(final String message) {
     System.err.println(message);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#warn(java.lang.String)
-   */
+  
   @Override
   public void warn(final String message) {
     System.err.println(message);
   }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.javacc.jjdoc.Generator#error(java.lang.String)
-   */
+  
   @Override
   public void error(final String message) {
     System.err.println(message);
   }
-
+  
   @Override
   public void lookAheadStart(final Lookahead l) {}
-
+  
   @Override
   public void lookAheadEnd(final Lookahead l) {}
 }

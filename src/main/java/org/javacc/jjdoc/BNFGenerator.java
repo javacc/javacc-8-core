@@ -29,6 +29,10 @@
  */
 package org.javacc.jjdoc;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import org.javacc.parser.CppCodeProduction;
 import org.javacc.parser.Expansion;
@@ -41,173 +45,213 @@ import org.javacc.parser.RJustName;
 import org.javacc.parser.RegularExpression;
 import org.javacc.parser.TokenProduction;
 
+/**
+ * Generator for the BNF representation of the grammar in simple text format.
+ */
 public class BNFGenerator implements Generator {
-
-  private final JJDocContext context;
-  protected PrintWriter ostr;
-  private boolean printing = true;
-
-  public BNFGenerator(final JJDocContext context) {
+  
+  /** The JJDoc context. */
+  JJDocContext context;
+  
+  /** The JJDoc tool. */
+  JJDoc jjdoc;
+  
+  /** The print writer. */
+  PrintWriter ostr;
+  
+  /** A flag to control printing. */
+  boolean printing = true;
+  
+  /**
+   * Constructor with parameters.
+   * 
+   * @param context - the JJDoc context
+   * @param jjdoc - the JJDoc tool
+   */
+  BNFGenerator(final JJDocContext context, final JJDoc jjdoc) {
     this.context = context;
+    this.jjdoc = jjdoc;
   }
-
-  protected PrintWriter create_output_stream() {
+  
+  /**
+   * Create an output stream for the generated Jack code. Try to open a file based on the name of
+   * the parser, but if that fails use the standard output stream.
+   * 
+   * @return a print writer
+   */
+  PrintWriter create_output_stream() {
     if (context.getOutputFile().equals("")) {
-      if (JJDocGlobals.input_file.equals("standard input")) {
-        return new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
+      
+      if (jjdoc.input_file.equals("standard input")) {
+        return new PrintWriter(new OutputStreamWriter(System.out));
+      }
+      
+      final String ext = ".bnf";
+      final int i = jjdoc.input_file.lastIndexOf('.');
+      if (i == -1) {
+        jjdoc.output_file_path = jjdoc.input_file + ext;
       } else {
-        final String ext = ".bnf";
-        final int i = JJDocGlobals.input_file.lastIndexOf('.');
-        if (i == -1) {
-          JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
+        final String suffix = jjdoc.input_file.substring(i);
+        if (suffix.equals(ext)) {
+          jjdoc.output_file_path = jjdoc.input_file + ext;
         } else {
-          final String suffix = JJDocGlobals.input_file.substring(i);
-          if (suffix.equals(ext)) {
-            JJDocGlobals.output_file = JJDocGlobals.input_file + ext;
-          } else {
-            JJDocGlobals.output_file = JJDocGlobals.input_file.substring(0, i) + ext;
-          }
+          jjdoc.output_file_path = jjdoc.input_file.substring(0, i) + ext;
         }
       }
+      final String od = context.getOutputDirectory();
+      if (!od.equals("")) {
+        final File odFile = new File(od);
+        if (!odFile.exists()) {
+          odFile.mkdirs();
+        }
+        jjdoc.output_file_path = od + File.separator + jjdoc.output_file_path;
+      } else {
+        jjdoc.output_file_path = jjdoc.input_directory + File.separator + jjdoc.output_file_path;
+      }
+      
     } else {
-      JJDocGlobals.output_file = context.getOutputFile();
+      
+      jjdoc.output_file_path = context.getOutputFile();
+      final File ofpFile = new File(jjdoc.output_file_path).getParentFile();
+      if (!ofpFile.exists()) {
+        ofpFile.mkdirs();
+      }
+      
     }
+    
     try {
-      ostr = new java.io.PrintWriter(new java.io.FileWriter(JJDocGlobals.output_file));
-    } catch (final java.io.IOException e) {
-      error(
-          "JJDoc: can't open output stream on file "
-              + JJDocGlobals.output_file
-              + ".  Using standard output.");
-      ostr = new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
+      ostr = new PrintWriter(new FileWriter(jjdoc.output_file_path));
     }
-
+    catch (final IOException e) {
+      error("JJDoc: can't open output stream on file " + jjdoc.output_file_path
+          + ".  Using standard output.");
+      ostr = new PrintWriter(new OutputStreamWriter(System.out));
+    }
+    
     return ostr;
   }
-
-  private void println(final String s) {
+  
+  /**
+   * Outputs a string with an end of line.
+   * 
+   * @param s - a string
+   */
+  void println(final String s) {
     print(s + "\n");
   }
-
+  
   @Override
   public void text(final String s) {
     if (printing && !((s.length() == 1) && ((s.charAt(0) == '\n') || (s.charAt(0) == '\r')))) {
       print(s);
     }
   }
-
+  
   @Override
   public void print(final String s) {
     ostr.print(s);
   }
-
+  
   @Override
   public void documentStart() {
     ostr = create_output_stream();
   }
-
+  
   @Override
   public void documentEnd() {
     ostr.close();
   }
-
+  
   @Override
   public void specialTokens(final String s) {}
-
-  // public void tokenStart(TokenProduction tp) {
-  // printing = false;
-  // }
-  // public void tokenEnd(TokenProduction tp) {
-  // printing = true;
-  // }
+  
   @Override
   public void nonterminalsStart() {}
-
+  
   @Override
   public void nonterminalsEnd() {}
-
+  
   @Override
   public void tokensStart() {}
-
+  
   @Override
   public void tokensEnd() {}
-
+  
   @Override
   public void javacode(final JavaCodeProduction jp) {}
-
+  
   @Override
   public void cppcode(final CppCodeProduction cp) {}
-
+  
   @Override
   public void expansionEnd(final Expansion e, final boolean first) {}
-
+  
   @Override
   public void nonTerminalStart(final NonTerminal nt) {}
-
+  
   @Override
   public void nonTerminalEnd(final NonTerminal nt) {}
-
+  
   @Override
   public void productionStart(final NormalProduction np) {
     println("");
     print(np.getLhs() + " ::= ");
   }
-
+  
   @Override
   public void productionEnd(final NormalProduction np) {
     println("");
   }
-
+  
   @Override
   public void expansionStart(final Expansion e, final boolean first) {
     if (!first) {
       print(" | ");
     }
   }
-
+  
   @Override
-  public void reStart(final RegularExpression r) {
-    if (r.getClass().equals(RJustName.class) || r.getClass().equals(RCharacterList.class)) {
+  public void reStart(final RegularExpression re) {
+    if (re.getClass().equals(RJustName.class) || re.getClass().equals(RCharacterList.class)) {
       printing = false;
     }
   }
-
+  
   @Override
-  public void reEnd(final RegularExpression r) {
+  public void reEnd(final RegularExpression re) {
     printing = true;
   }
-
+  
   @Override
   public void debug(final String message) {
     System.err.println(message);
   }
-
+  
   @Override
   public void info(final String message) {
     System.err.println(message);
   }
-
+  
   @Override
   public void warn(final String message) {
     System.err.println(message);
   }
-
+  
   @Override
   public void error(final String message) {
     System.err.println(message);
   }
-
+  
   @Override
-  public void handleTokenProduction(final TokenProduction tp) {
+  public void handleTokenProduction(final String text, final TokenProduction tp) {
     printing = false;
-    final String text = JJDoc.getStandardTokenProductionText(tp, context);
     text(text);
     printing = true;
   }
-
+  
   @Override
   public void lookAheadStart(final Lookahead l) {}
-
+  
   @Override
   public void lookAheadEnd(final Lookahead l) {}
 }
