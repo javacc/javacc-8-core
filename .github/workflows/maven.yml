@@ -65,8 +65,8 @@ jobs:
       uses: actions/cache@v4
       with:
          path: ~/.m2
-         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-         restore-keys: ${{ runner.os }}-m2-
+         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+         restore-keys: ${{ runner.os }}-maven-
 
     - name: Display the toolchains configured JDKs
       run: mvn --file javacc-8/pom.xml -ntp --show-version toolchains:display-discovered-jdk-toolchains
