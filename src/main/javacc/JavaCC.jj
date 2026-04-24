@@ -280,21 +280,10 @@ SPECIAL_TOKEN :
 | "\r"
 | "\f"
 | "\u001a"
-}
-
-/* JJTREE CODE */
-
-MORE :
-{
-  "/*@egen*/"        : AFTER_EGEN
+| "/*@egen*/"        : AFTER_EGEN
 | "/*@egen-0l*/"     : AFTER_EGEN_0L
 | "/*@egen-1l*/\n"   : AFTER_EGEN_1L
 | "/*@egen-1l*/\r\n" : AFTER_EGEN_1L
-|
-  "/*@bgen(jjtree)"        { saveBeginLineCol("bgen   ", 0, 0); } : IN_BGEN
-| " /*@bgen-1c(jjtree)"    { saveBeginLineCol("bgen-1c", 0, 1); } : IN_BGEN
-| "\n/*@bgen-1l(jjtree)"   { saveBeginLineCol("bgen-1l", 1, 0); } : IN_BGEN
-| "\r\n/*@bgen-1l(jjtree)" { saveBeginLineCol("bgen-1l", 1, 0); } : IN_BGEN
 }
 
 <AFTER_EGEN>
@@ -315,13 +304,8 @@ SKIP :
   < ~[] > { restoreBeginLineCol("egen-1l", 1, 0); input_stream.backup(1); } : DEFAULT
 }
 
-<IN_BGEN>
-SKIP :
-{
-  "*/" : DEFAULT
-}
-
-/* COMMENTS */
+/* COMMENTS & JJTREE CODE — @bgen patterns must be in the same MORE block as
+ * comment patterns because they share the "/*" prefix. */
 
 MORE :
 {
@@ -332,6 +316,17 @@ MORE :
   : IN_FORMAL_COMMENT
 |
   "/*" : IN_MULTI_LINE_COMMENT
+|
+  "/*@bgen(jjtree)"        { saveBeginLineCol("bgen   ", 0, 0); } : IN_BGEN
+| " /*@bgen-1c(jjtree)"    { saveBeginLineCol("bgen-1c", 0, 1); } : IN_BGEN
+| "\n/*@bgen-1l(jjtree)"   { saveBeginLineCol("bgen-1l", 1, 0); } : IN_BGEN
+| "\r\n/*@bgen-1l(jjtree)" { saveBeginLineCol("bgen-1l", 1, 0); } : IN_BGEN
+}
+
+<IN_BGEN>
+SKIP :
+{
+  "*/" : DEFAULT
 }
 
 <IN_SINGLE_LINE_COMMENT>
