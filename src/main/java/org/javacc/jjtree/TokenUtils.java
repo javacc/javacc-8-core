@@ -31,6 +31,9 @@ package org.javacc.jjtree;
 
 import org.javacc.parser.Context;
 
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+
 /** Utilities for manipulating Tokens. */
 public final class TokenUtils {
 
@@ -54,25 +57,61 @@ public final class TokenUtils {
     io.print(TokenUtils.addUnicodeEscapes(i));
   }
 
+  /**
+   * Escapes what can not be written as is to an output file, which is in the platform encoding.
+   *
+   * @param str - a string
+   * @return the string with unicode escapes in place of the control characters and of the
+   *     characters that the platform encoding does not have
+   */
   public static String addUnicodeEscapes(final String str) {
+    return addUnicodeEscapes(str, Charset.defaultCharset());
+  }
+
+  /**
+   * @param str - a string
+   * @param charset - the encoding of the file the string is written to
+   * @return the string with unicode escapes in place of the control characters and of the
+   *     characters that the encoding does not have
+   */
+  static String addUnicodeEscapes(final String str, final Charset charset) {
     final StringBuffer buff = new StringBuffer(str.length());
+    CharsetEncoder encoder = null;
     char ch;
     for (int i = 0; i < str.length(); i++) {
       ch = str.charAt(i);
-      // removed converting non control characters,
-      // as e.g. a non ascii unicode character can appear in a package, type or member identifier
-      if (((ch < 0x20) /* || (ch > 0x7e) */)
-          && (ch != '\t')
-          && (ch != '\n')
-          && (ch != '\r')
-          && (ch != '\f')) {
-        final String s = "0000" + Integer.toString(ch, 16);
-        buff.append("\\u" + s.substring(s.length() - 4, s.length()));
+      if (ch > 0x7e) {
+        // a non ascii unicode character can appear in a package, type or member identifier:
+        // it is kept as long as the encoding has it, as it would be lost otherwise
+        final int end =
+            Character.isHighSurrogate(ch)
+                    && i + 1 < str.length()
+                    && Character.isLowSurrogate(str.charAt(i + 1))
+                ? i + 2
+                : i + 1;
+        if (encoder == null) {
+          encoder = charset.newEncoder();
+        }
+        if (encoder.canEncode(str.subSequence(i, end))) {
+          buff.append(str, i, end);
+        } else {
+          for (int c = i; c < end; c++) {
+            addUnicodeEscape(buff, str.charAt(c));
+          }
+        }
+        i = end - 1;
+      } else if ((ch < 0x20) && (ch != '\t') && (ch != '\n') && (ch != '\r') && (ch != '\f')) {
+        addUnicodeEscape(buff, ch);
       } else {
         buff.append(ch);
       }
     }
     return buff.toString();
+  }
+
+  private static void addUnicodeEscape(final StringBuffer buff, final char ch) {
+    final String s = "0000" + Integer.toString(ch, 16);
+    buff.append("\\u" + s.substring(s.length() - 4, s.length()));
   }
 
   public static boolean hasTokens(final JJTreeNode n) {
