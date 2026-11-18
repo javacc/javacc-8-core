@@ -174,7 +174,7 @@ public class JavaCCInterpreter {
         }
       }
 
-      if (nfaStartState != -1) {
+      if (nfaStartState != -1 && curPos < input_size) {
         // We need to add the composite states first.
         curStates.add(nfaStartState);
         if (tokenizerData.nfa.get(nfaStartState).compositeStates != null) {
