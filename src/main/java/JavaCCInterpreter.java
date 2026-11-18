@@ -167,7 +167,7 @@ public class JavaCCInterpreter {
             // Found a string literal match.
             matchedKind = tokenizerData.literalKinds.get(key).get(litIndex);
             matchedPos = (curPos + charIndex) - 1;
-            nfaStartState = tokenizerData.kindToNfaStartState.get(matchedKind);
+            nfaStartState = tokenizerData.getNfaStartState(curLexState, matchedKind);
             curPos += charIndex;
             break;
           }

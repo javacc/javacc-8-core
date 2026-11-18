@@ -385,11 +385,17 @@ public class RStringLiteral extends RegularExpression {
       }
 
       final int stateIndex = RStringLiteral.GetStateSetForKind(im.length() - 1, kind, lexerContext);
-      if (stateIndex != -1) {
-        lexerContext.nfaStateMap.put(actualKind, NfaState.getNfaState(stateIndex, lexerContext));
-      } else {
-        lexerContext.nfaStateMap.put(actualKind, null);
+      final NfaState nfaState =
+          stateIndex != -1 ? NfaState.getNfaState(stateIndex, lexerContext) : null;
+      lexerContext.nfaStateMap.put(actualKind, nfaState);
+      // A literal declared in several lexical states has one start state in each of them.
+      Map<Integer, NfaState> lexStateMap =
+          lexerContext.lexStateNfaStateMap.get(lexerContext.lexStateIndex);
+      if (lexStateMap == null) {
+        lexStateMap = new HashMap<>();
+        lexerContext.lexStateNfaStateMap.put(lexerContext.lexStateIndex, lexStateMap);
       }
+      lexStateMap.put(actualKind, nfaState);
     }
   }
 
@@ -427,5 +433,15 @@ public class RStringLiteral extends RegularExpression {
     tokenizerData.setLiteralKinds(lexerContext.literalKinds);
     tokenizerData.setIgnoreCaserKinds(lexerContext.kindToIgnoreCase);
     tokenizerData.setKindToNfaStartState(nfaStateIndices);
+    final Map<Integer, Map<Integer, Integer>> lexStateNfaStateIndices = new HashMap<>();
+    for (final Map.Entry<Integer, Map<Integer, NfaState>> lexState :
+        lexerContext.lexStateNfaStateMap.entrySet()) {
+      final Map<Integer, Integer> indices = new HashMap<>();
+      for (final Map.Entry<Integer, NfaState> kind : lexState.getValue().entrySet()) {
+        indices.put(kind.getKey(), kind.getValue() != null ? kind.getValue().stateName : -1);
+      }
+      lexStateNfaStateIndices.put(lexState.getKey(), indices);
+    }
+    tokenizerData.setLexStateKindToNfaStartState(lexStateNfaStateIndices);
   }
 }
