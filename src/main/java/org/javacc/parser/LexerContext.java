@@ -94,6 +94,8 @@ class LexerContext {
   final Map<Integer, Integer> kindToLexicalState = new HashMap<>();
   final Set<Integer> kindToIgnoreCase = new HashSet<>();
   final Map<Integer, NfaState> nfaStateMap = new HashMap<>();
+  /** The NFA start state of each string literal kind, for each lexical state it is declared in. */
+  final Map<Integer, Map<Integer, NfaState>> lexStateNfaStateMap = new HashMap<>();
 
   LexerContext(final Context context) {
     this.context = context;
@@ -120,6 +122,7 @@ class LexerContext {
     kindToLexicalState.clear();
     kindToIgnoreCase.clear();
     nfaStateMap.clear();
+    lexStateNfaStateMap.clear();
   }
 
   /**

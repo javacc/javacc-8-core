@@ -167,14 +167,14 @@ public class JavaCCInterpreter {
             // Found a string literal match.
             matchedKind = tokenizerData.literalKinds.get(key).get(litIndex);
             matchedPos = (curPos + charIndex) - 1;
-            nfaStartState = tokenizerData.kindToNfaStartState.get(matchedKind);
+            nfaStartState = tokenizerData.getNfaStartState(curLexState, matchedKind);
             curPos += charIndex;
             break;
           }
         }
       }
 
-      if (nfaStartState != -1) {
+      if (nfaStartState != -1 && curPos < input_size) {
         // We need to add the composite states first.
         curStates.add(nfaStartState);
         if (tokenizerData.nfa.get(nfaStartState).compositeStates != null) {

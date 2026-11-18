@@ -70,6 +70,14 @@ public class TokenizerData {
    */
   public Map<Integer, Integer> kindToNfaStartState;
 
+  /**
+   * The NFA start state for a given string literal match, for each lexical state the literal is
+   * declared in: a map indexed by lexical state of maps indexed by kind.<br>
+   * A literal declared in more than one lexical state must continue in the NFA of the lexical state
+   * it is matched in; {@link #kindToNfaStartState} only knows one of them.
+   */
+  public Map<Integer, Map<Integer, Integer>> lexStateKindToNfaStartState;
+
   /** Class representing NFA state. */
   public static class NfaState {
 
@@ -182,6 +190,28 @@ public class TokenizerData {
 
   public void setKindToNfaStartState(final Map<Integer, Integer> kindToNfaStartState) {
     this.kindToNfaStartState = kindToNfaStartState;
+  }
+
+  public void setLexStateKindToNfaStartState(
+      final Map<Integer, Map<Integer, Integer>> lexStateKindToNfaStartState) {
+    this.lexStateKindToNfaStartState = lexStateKindToNfaStartState;
+  }
+
+  /**
+   * Gets the NFA start state for a string literal match in a lexical state.
+   *
+   * @param lexState the lexical state the literal is matched in
+   * @param kind the kind of the literal
+   * @return the NFA state to continue from, -1 if none
+   */
+  public int getNfaStartState(final int lexState, final int kind) {
+    if (lexStateKindToNfaStartState != null) {
+      final Map<Integer, Integer> kinds = lexStateKindToNfaStartState.get(lexState);
+      if (kinds != null && kinds.containsKey(kind)) {
+        return kinds.get(kind);
+      }
+    }
+    return kindToNfaStartState.get(kind);
   }
 
   /** Creates and adds an NfaState in the main map. */
