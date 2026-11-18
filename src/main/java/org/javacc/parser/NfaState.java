@@ -951,13 +951,15 @@ class NfaState {
       // states so adjust those as well here.
       // See the GenerateCode method where we set the name one state to be that of an equivalent
       // state.
+      // Such a state may be reached from more than one state: its name must be adjusted only once.
+      final Set<NfaState> adjusted = new HashSet<NfaState>();
       final Set<NfaState> useless = new HashSet<NfaState>();
       for (int i = 0; i < states.size(); i++) {
         final NfaState s = states.get(i);
         if (s.next != null) {
           assert (s.lexState == s.next.lexState);
           for (final NfaState next : s.next.epsilonMoveArray) {
-            if (next.stateName != -1 && !states.contains(next)) {
+            if (next.stateName != -1 && !states.contains(next) && adjusted.add(next)) {
               next.stateName += offset;
               if (!(next.stateName >= minStateName && next.stateName <= maxStateName)) {
                 useless.add(next);
